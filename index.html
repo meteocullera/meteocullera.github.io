@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="150">
+<title>MeteoCullera</title>
+<style>
+:root{--card:rgba(255,255,255,0.92);--text:#1f2937;--muted:#4b5563;--brand:#2563eb;--border:rgba(31,41,55,.14);--shadow:0 10px 22px rgba(0,0,0,.10)}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:linear-gradient(rgba(255,255,255,.84),rgba(255,255,255,.84)),url("images/fondo.jpg") center/cover fixed no-repeat}
+.logo{text-align:center;font-size:32px;font-weight:900;letter-spacing:.8px;padding:18px 0 10px;color:var(--brand)}
+.header-image{width:100%;max-height:260px;object-fit:cover;display:block;border-bottom:1px solid var(--border)}
+.update-time{text-align:center;font-size:14px;color:var(--muted);margin:10px 0 8px}
+.live-dot{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.8);animation:pulse 1.5s infinite;vertical-align:middle}
+@keyframes pulse{0%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}100%{transform:scale(1);opacity:1}}
+.container{max-width:1100px;margin:0 auto;padding:0 18px 20px}
+
+/* Contenedor adaptativo para el iframe de Davis WeatherLink Slim */
+.weatherlink-frame-container {
+    max-width: 620px;
+    margin: 20px auto;
+    background: #fff;
+    border: 1px solid rgba(31,41,55,.14);
+    border-radius: 14px;
+    box-shadow: 0 10px 22px rgba(0,0,0,.10);
+    overflow: hidden;
+    padding: 0;
+}
+.weatherlink-frame-container iframe {
+    width: 100%;
+    height: 645px;
+    border: none;
+    display: block;
+}
+
+.current-table{max-width:620px;margin:16px auto 20px;background:#fff;border:1px solid rgba(31,41,55,.14);border-radius:14px;box-shadow:0 10px 22px rgba(0,0,0,.10);overflow:hidden}
+.current-table table{width:100%;border-collapse:collapse;font-size:14px}
+.current-table th{background:#f3f4f6;color:#374151;font-weight:700;padding:10px;text-align:center}
+.current-table th[colspan]{font-size:18px}
+.current-table td{padding:8px 12px;border-top:1px solid #e5e7eb}
+.current-table td:first-child{color:#4b5563}
+@media(min-width:768px){.current-table td:last-child{text-align:right}}
+.wind-note{text-align:center;font-size:13px;color:#6b7280;margin-bottom:24px}
+footer{background:#1f2937;color:#d1d5db;padding:26px 18px;margin-top:40px}
+.footer-wrap{max-width:1100px;margin:0 auto;text-align:center;font-size:14px}
+.footer-button{margin-top:16px}
+.footer-button button{background:#2563eb;color:#fff;border:none;padding:8px 16px;border-radius:999px;font-weight:700;cursor:pointer}
+
+.current-table img{
+    display:block;
+    width:100%;
+    height:auto;
+    margin: 0 auto;
+}
+
+.social-hub{
+    max-width:1100px;
+    margin:40px auto;
+    padding:0 18px;
+}
+.social-hub h2{
+    text-align:center;
+    color:#374151;
+    margin-bottom:25px;
+}
+.social-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:18px;
+}
+.social-card{
+    background:rgba(255,255,255,.92);
+    border-radius:16px;
+    box-shadow:0 10px 22px rgba(0,0,0,.10);
+    border:1px solid rgba(31,41,55,.14);
+    padding:20px;
+    text-align:center;
+    text-decoration:none;
+    color:#1f2937;
+    transition:.25s;
+}
+.social-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 18px 35px rgba(0,0,0,.18);
+}
+.social-card img{
+    width:60px;
+    height:60px;
+    object-fit:contain;
+    margin-bottom:14px;
+}
+.social-card span{
+    display:block;
+    font-weight:700;
+    font-size:15px;
+}
+
+.history-link-wrap{
+    text-align:center;
+    margin:24px 0;
+}
+.history-link{
+    display:inline-block;
+    padding:10px 20px;
+    background:#2563eb;
+    color:#fff;
+    text-decoration:none;
+    border-radius:999px;
+    font-size:14px;
+    font-weight:700;
+    box-shadow:0 8px 18px rgba(37,99,235,.22);
+    transition:.25s;
+}
+.history-link:hover{
+    background:#1d4ed8;
+    transform:translateY(-2px);
+    box-shadow:0 12px 24px rgba(37,99,235,.30);
+}
+
+.windy-container{
+    position:relative;
+    width:100%;
+    aspect-ratio:16/9;
+}
+.windy-container iframe{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    border:0;
+}
+</style>
+</head>
+<body>
+<div class="logo">MeteoCullera</div>
+<img src="/images/encabezado.jpg" class="header-image" alt="Encabezado MeteoCullera">
+<div class="update-time"><span class="live-dot"></span>Estación meteorológica en vivo</div>
+
+<div class="container">
+
+<!-- NUEVO EMEDDED FRAME SLIM DE DAVIS WEATHERLINK -->
+<div class="weatherlink-frame-container">
+    <iframe src="https://weatherlink.com" title="MeteoCullera Davis WeatherLink"></iframe>
+</div>
+
+<!-- WEBCAM EN DIRECTO (SANT ANTONI) -->
+<div class="current-table">
+<table>
+<tr>
+    <th>Webcam en directo</th>
+</tr>
+<tr>
+    <td style="padding:0;">
+        <img src="image_nhKi9_.png" alt="Webcam MeteoCullera actual" style="width:100%; height:auto; display:block;">
+    </td>
+</tr>
+</table>
+</div>
+
+<!-- BOTÓN ARCHIVO HISTÓRICO -->
+<div class="history-link-wrap">
+    <a class="history-link" href="https://avamet.org" target="_blank">Consultar archivo hist&oacute;rico completo</a>
+</div>
+
+<!-- OBSERVACIÓN Y RADAR -->
+<div class="current-table">
+<table>
+<tr>
+    <th>Observaci&oacute;n</th>
+</tr>
+<tr>
+    <td style="padding:15px; text-align:center;">
+        <div class="windy-container">
+            <iframe
+                src="https://windy.com"
+                frameborder="0"
+                loading="lazy"
+                allowfullscreen>
+            </iframe>
+        </div>
+        <br>
+        <img src="https://meteociel.fr" style="width:100%; max-width:500px; height:auto; margin-bottom:15px;" alt="Satélite Meteociel"><br>
+        <img src="https://meteociel.fr" style="width:100%; max-width:500px; height:auto;" alt="Radar Meteociel">
+    </td>
+</tr>
+</table>
+</div>
+
+<!-- METEOGRAMA Y PREVISIÓN -->
+<div class="current-table">
+<table>
+<tr>
+    <th>Meteograma y previsi&oacute;n</th>
+</tr>
+<tr>
+    <td style="padding:15px; text-align:center;">
+        <img src="https://meteociel.fr" style="width:100%; max-width:500px; height:auto;" alt="Meteograma">
+    </td>
+</tr>
+</table>
+</div>
+
+<!-- LA ESTACIÓN FÍSICA -->
+<div class="current-table">
+<table>
+<tr>
+    <th>La estaci&oacute;n: Davis Vantage Pro 2 Plus 6162</th>
+</tr>
+<tr>
+    <td style="text-align:center; padding: 15px 0;">
+        <img src="/images/davis1.jpg" width="300" title="ISS Vantage Pro 2 Plus" style="margin-bottom:15px;"><br>
+        <img src="/images/davis2.jpg" width="300" title="ISS Vantage Pro 2 Plus" style="margin-bottom:15px;"><br>
+        <img src="/images/davis3.jpg" width="300" title="Consola Vantage Pro 2" style="margin-bottom:15px;"><br>
+        <img src="/images/davis5.jpg" width="300" title="Software Weatherlink"><br>
+    </td>
+</tr>
+</table>
+</div>
+
+<!-- LOCALIZACIÓN GOOGLE MAPS -->
+<div class="current-table">
+<table>
+<tr>
+    <th>Localizaci&oacute;n: Cullera, Valencia</th>
+</tr>
+<tr>
+    <td style="text-align:center; padding:0;">
+        <iframe
+            src="https://google.com"
+            width="100%"
+            height="350"
+            style="border:0; display:block;"
+            loading="lazy"
+            allowfullscreen>
+        </iframe>
+    </td>
+</tr>
+</table>
+</div>
+
+<!-- RED DE ENLACES (SOCIAL HUB) -->
+<div class="social-hub">
+    <h2>Datos y gr&aacute;ficos completos</h2>
+    <div class="social-grid">
+        <a class="social-card" href="https://x.com" target="_blank"><img src="/images/x.png" alt=""><span>X (Twitter)</span></a>
+        <a class="social-card" href="https://instagram.com" target="_blank"><img src="images/instagram.png" alt=""><span>Instagram</span></a>
+        <a class="social-card" href="https://facebook.com" target="_blank"><img src="images/facebook.png" alt=""><span>Facebook</span></a>
+        <a class="social-card" href="https://avamet.org" target="_blank"><img src="images/avamet.png" alt=""><span>AVAMET</span></a>
+        <a class="social-card" href="https://meteoclimatic.net" target="_blank"><img src="images/meteoclimatic.png" alt=""><span>Meteoclimatic</span></a>
+        <a class="social-card" href="https://weathercloud.net" target="_blank"><img src="images/weathercloud.png" alt=""><span>WeatherCloud</span></a>
+        <a class="social-card" href="https://wunderground.com" target="_blank"><img src="images/wunderground.png" alt=""><span>Weather Underground</span></a>
+        <a class="social-card" href="https://meteonetwork.eu" target="_blank"><img src="images/meteonetwork.png" alt=""><span>MeteoNetwork</span></a>
+        <a class="social-card" href="https://awekas.at" target="_blank"><img src="images/awekas.png" alt=""><span>Awekas</span></a>
+        <a class="social-card" href="https://pwsweather.com" target="_blank"><img src="images/pwsweather.png" alt=""><span>PWS Weather</span></a>
+        <a class="social-card" href="https://metoffice.gov.uk" target="_blank"><img src="images/metoffice.png" alt=""><span>MetOffice</span></a>
+        <a class="social-card" href="https://infoclimat.fr" target="_blank"><img src="images/infoclimat.png" alt=""><span>Infoclimat</span></a>
+        <a class="social-card" href="https://climameteoinfo.com" target="_blank"><img src="images/cmi.png" alt=""><span>Climameteoinfo</span></a>
+        <a class="social-card" href="https://windy.com" target="_blank"><img src="images/windy.png" alt=""><span>Windy</span></a>
+        <a class="social-card" href="https://weatherlink.com" target="_blank"><img src="images/weatherlink.png" alt=""><span>Weatherlink</span></a>
+        <a class="social-card" href="https://findu.com" target="_blank"><img src="images/cwop.png" alt=""><span>CWOP</span></a>
+        <a class="social-card" href="https://aprs.fi" target="_blank"><img src="images/findu.png" alt=""><span>Findu-APRS</span></a>
+        <a class="social-card" href="https://seguimeteo.com" target="_blank"><img src="images/seguimeteo.png" alt=""><span>Seguimeteo</span></a>
+    </div>
+</div>
+
+<footer>
+<div class="footer-wrap">
+    <p>© 2007–2026 MeteoCullera<br>Estaci&oacute;n meteorol&oacute;gica de Cullera – Sant Antoni, Valencia<br>39&deg; 9' N / 0&deg; 14' W / 10 m</p>
+    <p><strong>Observador:</strong> Jorge Pizarro Rivas (meteocullera@gmail.com)<br><br> Datos actualizados cada 60 segundos con <b>WifiLogger</b></p>
+    <br>
+    <img src="/images/logo.png" width="200"><br><br>
+    <a href="https://davisinstruments.com" target="_blank"><img src="https://webcindario.com"></a><br><br>
+    <a href="https://wifilogger.net" target="_blank"><img src="/images/wifilogger.png" width="200"></a><br><br>
+    <a href="https://foscam.es" target="_blank"><img src="/images/foscam.png" width="200"></a><br><br>
+
+    <a href="https://meteoclimatic.net" target="_blank"><img src="https://meteoclimatic.net" width="300"></a>
+    <br><br>
+    <script type="text/javascript">document.write("<iframe style=\"width:300px;height:250px;border:0;\" scrolling=\"no\" src=\"https://avamet.org\"></iframe>")</script>
+    <br>
+    <a href="https://weathercloud.net"><img src="https://weathercloud.net" width="300"></a>
+    <br><br>
+    <a href="https://climameteoinfo.com"><img src="https://climameteoinfo.com" width="300"></a>
+    <br><br>
+    <iframe src="https://awekas.at" width="300" height="250" scrolling="no" marginheight="0" marginwidth="0" frameborder="0" name="AWEKAS Wetterwidget"></iframe>
+    <br><br>
+    <b>Última versión de la web: Adaptación a GitHub Pages y Frame de Davis WeatherLink Slim</b>
+    <br><br>
+    <hr>
+</div>
+</footer>
+
+</body>
+</html>
