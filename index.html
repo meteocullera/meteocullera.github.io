@@ -333,25 +333,6 @@ footer{background:#1f2937;color:#d1d5db;padding:26px 18px;margin-top:40px}
 </div>
 </footer>
 
-<script>
-function ajustarAlturaMeteo() {
-    const iframe = document.getElementById('iframe-meteo');
-    if (iframe) {
-        // Si la pantalla es más pequeña que un iPad (móviles), le damos más margen vertical
-        if (window.innerWidth < 768) {
-            iframe.style.height = "1650px";
-        } else {
-            // En ordenadores y pantallas grandes las filas son más compactas
-            iframe.style.height = "1280px";
-        }
-    }
-}
-
-// Ejecutar al cargar la página principal
-window.addEventListener('load', ajustarAlturaMeteo);
-// Reajustar de forma elástica si el usuario gira el móvil o cambia el tamaño del navegador
-window.addEventListener('resize', ajustarAlturaMeteo);
-</script>
 
     
 </body>
