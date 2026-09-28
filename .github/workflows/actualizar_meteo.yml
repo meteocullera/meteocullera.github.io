@@ -2,11 +2,11 @@ name: Actualizar Datos Meteo
 
 on:
   schedule:
-    # Se ejecuta cada 15 minutos
+    # Se ejecuta de forma automática cada 15 minutos
     - cron: '*/15 * * * *'
   workflow_dispatch: # Permite activar el script manualmente desde la pestaña "Actions"
 
-# ESTE BLOQUE ES CRÍTICO: Da permisos para hacer push de vuelta al repositorio
+# Da permisos de escritura para que el bot pueda subir el JSON y el PNG al repositorio
 permissions:
   contents: write
 
@@ -21,10 +21,21 @@ jobs:
       run: |
         curl -s "https://www.climameteoinfo.com/bd/api.php?id_est=VAL_210401867121&key=06f4781ffa4cf7a4236722fbb09a8a78548f94137ff318c6bf59d16050986911&format=json" -o datos.json
 
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Instalar librerías de gráficos
+      run: pip install matplotlib
+
+    - name: Generar Gráfico Estático
+      run: python generar_grafico.py
+
     - name: Confirmar y subir cambios
       run: |
         git config --global user.name "github-actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add datos.json
-        # Solo hace commit si el archivo ha cambiado para no ensuciar el historial innecesariamente
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Meteo: Datos actualizados automáticamente" && git push)
+        git config --global user.email "41898282+github-actions[bot]@://github.com"
+        # Añadimos el JSON y la nueva imagen generada para subirlos juntos
+        git add datos.json grafico_temperaturas.png
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Meteo: Datos y gráfico actualizados automáticamente" && git push)
