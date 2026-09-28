@@ -204,14 +204,9 @@ footer{background:#1f2937;color:#d1d5db;padding:26px 18px;margin-top:40px}
 <div class="container">
 
 <!-- NUEVO EMEDDED FRAME SLIM DE DAVIS WEATHERLINK -->
-<div class="weatherlink-frame-container">
-    <iframe src="https://www.weatherlink.com/embeddablePage/show/648319f5cc46401aa53deb0a11d94f9f/slim" width="350" height="520" scrolling="no" frameborder="no" title="MeteoCullera Davis WeatherLink"></iframe>
-</div>
-<!-- BOTÓN ARCHIVO HISTÓRICO -->
-<div class="history-link-wrap">
-    <a class="history-link" href="https://www.weatherlink.com/embeddablePage/show/648319f5cc46401aa53deb0a11d94f9f/summary" target="_blank">Sumario completo de datos</a>
-</div>
-    
+<div style="width: 100%; overflow: hidden; margin: 20px auto;">
+    <iframe src="tabla-meteo.html" id="iframe-meteo" style="width: 100%; border: none; height: 1650px; overflow: hidden; display: block;" scrolling="no"></iframe>
+</div>    
 
 <!-- WEBCAM EN DIRECTO (SANT ANTONI) -->
 <div class="current-table">
@@ -340,5 +335,26 @@ footer{background:#1f2937;color:#d1d5db;padding:26px 18px;margin-top:40px}
 </div>
 </footer>
 
+<script>
+function ajustarAlturaMeteo() {
+    const iframe = document.getElementById('iframe-meteo');
+    if (iframe) {
+        // Si la pantalla es más pequeña que un iPad (móviles), le damos más margen vertical
+        if (window.innerWidth < 768) {
+            iframe.style.height = "1650px";
+        } else {
+            // En ordenadores y pantallas grandes las filas son más compactas
+            iframe.style.height = "1280px";
+        }
+    }
+}
+
+// Ejecutar al cargar la página principal
+window.addEventListener('load', ajustarAlturaMeteo);
+// Reajustar de forma elástica si el usuario gira el móvil o cambia el tamaño del navegador
+window.addEventListener('resize', ajustarAlturaMeteo);
+</script>
+
+    
 </body>
 </html>
