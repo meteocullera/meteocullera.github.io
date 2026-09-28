@@ -1,56 +1,67 @@
 import json
+import os
 import matplotlib.pyplot as plt
+from datetime import datetime
 
-# 1. Cargar los datos del JSON recién descargado
+# 1. Cargar el dato actual recién descargado
 with open('datos.json', 'r', encoding='utf-8') as f:
-    datos = json.load(f)
+    datos_actuales = json.load(f)
 
-dia = datos['dades_dia']
-mes = datos['dades_mes']
-any_meteo = datos['dades_any']
+act = datos_actuales['dades_act']
+hora_actual = act['HORA']          # Ejemplo: "21:55"
+temp_actual = float(act['TEMP'])   # Ejemplo: 24.8
 
-# 2. Preparar los datos convirtiéndolos a números flotantes
-categorias = ['Hoy', 'Este Mes', 'Este Año']
-maximas = [float(dia['TMax_d']), float(mes['TMax_m']), float(any_meteo['TMax_a'])]
-minimas = [float(dia['TMin_d']), float(mes['TMin_m']), float(any_meteo['TMin_a'])]
+# Archivo donde guardaremos el histórico de las últimas 24 horas
+archivo_historico = 'historico_dia.json'
 
-# 3. Configurar el estilo del gráfico
-fig, ax = plt.subplots(figsize=(7, 4.5), dpi=150)
-fig.patch.set_facecolor('none')  # Fondo exterior transparente
-ax.set_facecolor('#f8fafc')      # Fondo del gráfico gris muy claro
+# 2. Resetear el archivo si es medianoche (comienzo del día)
+if hora_actual == "00:00" or hora_actual == "00:05" or hora_actual == "00:10" or hora_actual == "00:15":
+    historico = []
+else:
+    if os.path.exists(archivo_historico):
+        with open(archivo_historico, 'r', encoding='utf-8') as f:
+            try:
+                historico = json.load(f)
+            except:
+                historico = []
+    else:
+        historico = []
 
-x = range(len(categorias))
-width = 0.35  # Ancho de las barras
+# 3. Evitar duplicar la misma hora si la acción corre dos veces en el mismo tramo
+if not historico or historico[-1]['hora'] != hora_actual:
+    historico.append({'hora': hora_actual, 'temp': temp_actual})
 
-# Dibujar las barras de máximas y mínimas
-barras_max = ax.bar([i - width/2 for i in x], maximas, width, label='Temp. Máxima', color='#dc2626', edgecolor='none', zorder=3)
-barras_min = ax.bar([i + width/2 for i in x], minimas, width, label='Temp. Mínima', color='#2563eb', edgecolor='none', zorder=3)
+# Guardar el registro actualizado
+with open(archivo_historico, 'w', encoding='utf-8') as f:
+    json.dump(historico, f, indent=4)
 
-# Añadir las etiquetas de texto con los grados encima de cada barra
-for barra in barras_max:
-    height = barra.get_height()
-    ax.annotate(f'{height}°C', xy=(barra.get_x() + barra.get_width() / 2, height),
-                xytext=(0, 3), textcoords="offset points", ha='center', va='bottom', fontsize=9, fontweight='bold', color='#1f2937')
+# 4. Extraer las listas para pintar el gráfico del día
+horas = [punto['hora'] for punto in historico]
+temperaturas = [punto['temp'] for punto in historico]
 
-for barra in barras_min:
-    height = barra.get_height()
-    ax.annotate(f'{height}°C', xy=(barra.get_x() + barra.get_width() / 2, height),
-                xytext=(0, 3), textcoords="offset points", ha='center', va='bottom', fontsize=9, fontweight='bold', color='#1f2937')
+# 5. Diseñar el gráfico de evolución diaria
+fig, ax = plt.subplots(figsize=(8, 4), dpi=150)
+fig.patch.set_facecolor('none')
+ax.set_facecolor('#f8fafc')
 
-# Personalización de ejes y diseño
-ax.set_title('Rangos de Temperatura en Cullera', fontsize=14, fontweight='bold', pad=15, color='#1f2937')
-ax.set_xticks(x)
-ax.set_xticklabels(categorias, fontsize=11, fontweight='600', color='#4b5563')
-ax.set_ylabel('Temperatura (°C)', fontsize=11, color='#4b5563')
-ax.grid(axis='y', linestyle='--', alpha=0.5, zorder=0)
+# Dibujar la línea de evolución con un degradado suave debajo si lo deseas
+ax.plot(horas, temperaturas, color='#dc2626', marker='o', linewidth=2, markersize=4, label='Temperatura (°C)', zorder=3)
 
-# Limpiar bordes innecesarios
+# Configuración visual
+ax.set_title('Evolución de la Temperatura Hoy en Cullera', fontsize=12, fontweight='bold', pad=10, color='#1f2937')
+ax.grid(axis='both', linestyle='--', alpha=0.4, zorder=0)
+
+# Reducir el número de etiquetas en el eje X para que no se amontonen si hay muchos puntos
+if len(horas) > 8:
+    ax.set_xticks(horas[::4])  # Muestra una etiqueta cada hora (4 puntos de 15 min)
+else:
+    ax.set_xticks(horas)
+
+ax.tick_params(axis='both', labelsize=9, colors='#4b5563')
+
 for spine in ['top', 'right', 'left', 'bottom']:
     ax.spines[spine].set_visible(False)
 
-ax.legend(frameon=True, facecolor='#ffffff', edgecolor='none', loc='upper left')
-
-# Ajustar y guardar la imagen de forma estática
 plt.tight_layout()
-plt.savefig('grafico_temperaturas.png', bbox_inches='tight', transparent=True)
+plt.savefig('grafico_dia.png', bbox_inches='tight', transparent=True)
 plt.close()
