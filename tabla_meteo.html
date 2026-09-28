@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla MeteoCullera API</title>
+    <style>
+        /* Heredamos exactamente los estilos visuales de tu sitio web */
+        :root {
+            --card: rgba(255, 255, 255, 0.92);
+            --text: #1f2937;
+            --muted: #4b5563;
+            --brand: #2563eb;
+            --border: rgba(31, 41, 55, .14);
+            --shadow: 0 10px 22px rgba(0, 0, 0, .10);
+        }
+
+        body {
+            margin: 0;
+            padding: 5px;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            color: var(--text);
+            background: transparent; /* Permite ver el fondo de la web principal */
+        }
+
+        /* Contenedor idéntico a tus actuales .current-table */
+        .current-table {
+            max-width: 100%;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .current-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .current-table th {
+            background: #f3f4f6;
+            color: #374151;
+            font-weight: 700;
+            padding: 14px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .current-table td {
+            padding: 10px 14px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* Primera columna (Nombres de las variables) */
+        .current-table td:first-child {
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        /* Segunda columna (Valores) */
+        .current-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        /* Resaltado especial para la fila de actualización */
+        .row-update {
+            background-color: #fafafa;
+            font-size: 13px;
+        }
+
+        /* Efecto de carga discreto */
+        .loading {
+            color: #9ca3af;
+            font-style: italic;
+            font-weight: normal !important;
+        }
+
+        /* Animación para el indicador en vivo */
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 6px rgba(34, 197, 94, .8);
+            animation: pulse 1.5s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: .6; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Estilo Responsive para pantallas muy pequeñas */
+        @media (max-width: 480px) {
+            .current-table th { font-size: 14px; padding: 10px; }
+            .current-table td { padding: 8px 10px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="current-table">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Condiciones Actuales (Estación)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="row-update">
+                    <td><span class="live-dot"></span>Último dato</td>
+                    <td id="meteo-fecha" class="loading">Cargando...</td>
+                </tr>
+                <tr>
+                    <td>Temperatura Actual</td>
+                    <td id="meteo-temp" class="loading">Cargando...</td>
+                </tr>
+                <tr>
+                    <td>Humedad Relativa</td>
+                    <td id="meteo-hum" class="loading">Cargando...</td>
+                </tr>
+                <tr>
+                    <td>Viento</td>
+                    <td id="meteo-viento" class="loading">Cargando...</td>
+                </tr>
+                <tr>
+                    <td>Presión Atmosférica</td>
+                    <td id="meteo-presion" class="loading">Cargando...</td>
+                </tr>
+                <tr>
+                    <td>Lluvia acumulada hoy</td>
+                    <td id="meteo-lluvia" class="loading">Cargando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function cargarDatosMeteo() {
+            // Ruta relativa hacia el JSON que actualiza tu Actions
+            const url = "./datos.json";
+
+            try {
+                const respuesta = await fetch(url);
+                if (!respuesta.ok) throw new Error("Error en lectura");
+                
+                const datos = await respuesta.json();
+                
+                // Mapeo directo contra los nodos reales de dades_act
+                const actuales = datos.dades_act;
+
+                document.getElementById("meteo-fecha").textContent = actuales.HORA ? `${actuales.DATA || ''} a las ${actuales.HORA}` : "--";
+                document.getElementById("meteo-temp").textContent = actuales.TEMP !== undefined ? `${actuales.TEMP} °C` : "--";
+                document.getElementById("meteo-hum").textContent = actuales.HUM !== undefined ? `${actuales.HUM} %` : "--";
+                document.getElementById("meteo-viento").textContent = actuales.VEL !== undefined ? `${actuales.VEL} km/h (${actuales.DIR || ''})` : "--";
+                document.getElementById("meteo-presion").textContent = actuales.BAR !== undefined ? `${actuales.BAR} hPa` : "--";
+                document.getElementById("meteo-lluvia").textContent = actuales.PREC !== undefined ? `${actuales.PREC} mm` : "--";
+
+                // Retirar clases de carga de forma limpia
+                document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
+
+            } catch (error) {
+                console.error("Error al procesar el JSON:", error);
+                document.querySelectorAll('.loading').forEach(el => el.textContent = "Error");
+            }
+        }
+
+        // Carga inicial al desplegar
+        document.addEventListener("DOMContentLoaded", cargarDatosMeteo);
+        
+        // Auto-refresco en segundo plano cada 5 minutos por si el usuario deja la pestaña abierta
+        setInterval(cargarDatosMeteo, 300000);
+    </script>
+
+</body>
+</html>
