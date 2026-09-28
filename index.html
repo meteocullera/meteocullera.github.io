@@ -202,27 +202,7 @@ footer{background:#1f2937;color:#d1d5db;padding:26px 18px;margin-top:40px}
 <div class="update-time"><span class="live-dot"></span>Estación en tiempo real</div>
 
 <div class="container">
-
-<!-- NUEVO EMEDDED FRAME SLIM DE DAVIS WEATHERLINK -->
-<div style="width: 100%; overflow: hidden; margin: 20px auto;">
-    <iframe src="https://github.io" id="iframe-meteo" style="width: 100%; border: none; height: 1650px; overflow: hidden; display: block;" scrolling="no"></iframe>
-</div>
-
-<script>
-    // Escucha el mensaje de altura enviado desde la tabla interna
-    window.addEventListener('message', function(event) {
-        // Asegura que el mensaje viene de tu propio sitio por seguridad
-        if (!event.origin.includes('meteocullera.github.io')) return;
-        
-        if (event.data && event.data.type === 'resize-iframe') {
-            const iframe = document.getElementById('iframe-meteo');
-            if (iframe) {
-                // Ajusta la altura del iframe exactamente al tamaño del contenido + un pequeño margen
-                iframe.style.height = (event.data.height + 20) + 'px';
-            }
-        }
-    }, false);
-</script>
+<!-- NUEVO EMEDDED FRAME SLIM DE DAVIS WEATHERLINK --><div style="width: 100%; overflow: hidden; margin: 20px auto;"> <iframe src="https://meteocullera.github.io/tabla_meteo.html" id="iframe-meteo" style="width: 100%; border: none; height: 100%; overflow: hidden; display: block;" scrolling="no"></iframe></div>
     
 <!-- WEBCAM EN DIRECTO (SANT ANTONI) -->
 <div class="current-table">
