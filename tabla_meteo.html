@@ -1,184 +1,294 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabla MeteoCullera API</title>
-    <style>
-        /* Heredamos exactamente los estilos visuales de tu sitio web */
-        :root {
-            --card: rgba(255, 255, 255, 0.92);
-            --text: #1f2937;
-            --muted: #4b5563;
-            --brand: #2563eb;
-            --border: rgba(31, 41, 55, .14);
-            --shadow: 0 10px 22px rgba(0, 0, 0, .10);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Datos Completos MeteoCullera</title>
+<style>
+/* Unificación absoluta con las variables de diseño de tu web principal */
+:root {
+    --card: rgba(255,255,255,0.92);
+    --text: #1f2937;
+    --muted: #4b5563;
+    --brand: #2563eb;
+    --border: rgba(31,41,55,.14);
+}
+body {
+    margin: 0;
+    padding: 5px 2px;
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    color: var(--text);
+    background: transparent;
+}
 
-        body {
-            margin: 0;
-            padding: 5px;
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-            color: var(--text);
-            background: transparent; /* Permite ver el fondo de la web principal */
-        }
+/* Banner superior para destacar la actualización arriba */
+.update-banner {
+    max-width: 100%;
+    margin: 0 auto 16px auto;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    padding: 10px 14px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e40af;
+}
 
-        /* Contenedor idéntico a tus actuales .current-table */
-        .current-table {
-            max-width: 100%;
-            margin: 0 auto;
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
+/* Estructura elástica de las tablas (.current-table) */
+.current-table {
+    max-width: 100%;
+    margin: 0 auto 24px auto;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 10px 22px rgba(0,0,0,.10);
+    overflow: hidden;
+}
+.current-table:last-child {
+    margin-bottom: 5px;
+}
+.current-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.current-table th {
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 700;
+    padding: 13px;
+    text-align: center;
+    font-size: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+.current-table th.header-actual {
+    background: #f1f5f9;
+    color: var(--brand);
+    font-size: 17px;
+}
+.current-table td {
+    padding: 10px 14px;
+    border-top: 1px solid #e5e7eb;
+}
+.current-table td:first-child {
+    color: var(--muted);
+    font-weight: 500;
+}
+.current-table td:last-child {
+    font-weight: 700;
+}
 
-        .current-table table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
+/* Orientación adaptativa en ordenadores */
+@media(min-width: 768px) {
+    .current-table td:last-child {
+        text-align: right;
+    }
+}
 
-        .current-table th {
-            background: #f3f4f6;
-            color: #374151;
-            font-weight: 700;
-            padding: 14px;
-            text-align: center;
-            font-size: 16px;
-        }
+/* Resaltado de extremos meteorológicos */
+.maxima { color: #dc2626 !important; }
+.minima { color: #2563eb !important; }
 
-        .current-table td {
-            padding: 10px 14px;
-            border-top: 1px solid #e5e7eb;
-        }
+/* Indicador live parpadeante idéntico al tuyo */
+.live-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34,197,94,.8);
+    animation: pulse 1.5s infinite;
+    vertical-align: middle;
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: .6; }
+    100% { transform: scale(1); opacity: 1; }
+}
 
-        /* Primera columna (Nombres de las variables) */
-        .current-table td:first-child {
-            color: var(--muted);
-            font-weight: 500;
-        }
+/* Efecto transitorio de carga */
+.loading {
+    font-style: italic;
+    color: #9ca3af;
+    animation: flash 1.5s infinite alternate;
+}
+@keyframes flash { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* Segunda columna (Valores) */
-        .current-table td:last-child {
-            text-align: right;
-            font-weight: 600;
-        }
-
-        /* Resaltado especial para la fila de actualización */
-        .row-update {
-            background-color: #fafafa;
-            font-size: 13px;
-        }
-
-        /* Efecto de carga discreto */
-        .loading {
-            color: #9ca3af;
-            font-style: italic;
-            font-weight: normal !important;
-        }
-
-        /* Animación para el indicador en vivo */
-        .live-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            margin-right: 6px;
-            border-radius: 50%;
-            background: #22c55e;
-            box-shadow: 0 0 6px rgba(34, 197, 94, .8);
-            animation: pulse 1.5s infinite;
-            vertical-align: middle;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.4); opacity: .6; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* Estilo Responsive para pantallas muy pequeñas */
-        @media (max-width: 480px) {
-            .current-table th { font-size: 14px; padding: 10px; }
-            .current-table td { padding: 8px 10px; font-size: 13px; }
-        }
-    </style>
+@media(max-width: 440px) {
+    .update-banner { font-size: 13px; padding: 8px 10px; }
+    .current-table th { font-size: 15px; padding: 11px; }
+    .current-table table { font-size: 13px; }
+    .current-table td { padding: 9px 12px; }
+}
+</style>
 </head>
 <body>
 
-    <div class="current-table">
-        <table>
-            <thead>
-                <tr>
-                    <th colspan="2">Condiciones Actuales (Estación)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="row-update">
-                    <td><span class="live-dot"></span>Último dato</td>
-                    <td id="meteo-fecha" class="loading">Cargando...</td>
-                </tr>
-                <tr>
-                    <td>Temperatura Actual</td>
-                    <td id="meteo-temp" class="loading">Cargando...</td>
-                </tr>
-                <tr>
-                    <td>Humedad Relativa</td>
-                    <td id="meteo-hum" class="loading">Cargando...</td>
-                </tr>
-                <tr>
-                    <td>Viento</td>
-                    <td id="meteo-viento" class="loading">Cargando...</td>
-                </tr>
-                <tr>
-                    <td>Presión Atmosférica</td>
-                    <td id="meteo-presion" class="loading">Cargando...</td>
-                </tr>
-                <tr>
-                    <td>Lluvia acumulada hoy</td>
-                    <td id="meteo-lluvia" class="loading">Cargando...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+<!-- BANNER DE ACTUALIZACIÓN SUPERIOR -->
+<div class="update-banner">
+    <span class="live-dot"></span>Última actualización: <span id="m-fecha-top" class="loading">Cargando...</span>
+</div>
 
-    <script>
-        async function cargarDatosMeteo() {
-            // Ruta relativa hacia el JSON que actualiza tu Actions
-            const url = "./datos.json";
+<!-- BLOQUE 1: CONDICIONES ACTUALES -->
+<div class="current-table">
+    <table>
+        <thead>
+            <tr>
+                <th colspan="2" class="header-actual">Condiciones Actuales</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Temperatura</td><td id="act-temp" class="loading">Cargando...</td></tr>
+            <tr><td>Humedad Relativa</td><td id="act-hum" class="loading">Cargando...</td></tr>
+            <tr><td>Presión Atmosférica</td><td id="act-bar" class="loading">Cargando...</td></tr>
+            <tr><td>Viento Actual</td><td id="act-vel" class="loading">Cargando...</td></tr>
+            <tr><td>Radiación Solar</td><td id="act-sun" class="loading">Cargando...</td></tr>
+            <tr><td>Índice Ultravioleta (UV)</td><td id="act-uvi" class="loading">Cargando...</td></tr>
+            <tr><td>Precipitación hoy</td><td id="act-prec" class="loading">Cargando...</td></tr>
+            <tr><td>Intensidad de lluvia</td><td id="act-pint" class="loading">Cargando...</td></tr>
+        </tbody>
+    </table>
+</div>
 
-            try {
-                const respuesta = await fetch(url);
-                if (!respuesta.ok) throw new Error("Error en lectura");
-                
-                const datos = await respuesta.json();
-                
-                // Mapeo directo contra los nodos reales de dades_act
-                const actuales = datos.dades_act;
+<!-- BLOQUE 2: EXTREMOS DIARIOS -->
+<div class="current-table">
+    <table>
+        <thead>
+            <tr><th colspan="2">Extremos de Hoy</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Temperatura Máxima</td><td id="dia-tmax" class="maxima loading">Cargando...</td></tr>
+            <tr><td>Temperatura Mínima</td><td id="dia-tmin" class="minima loading">Cargando...</td></tr>
+            <tr><td>Humedad Máxima</td><td id="dia-hmax" class="loading">Cargando...</td></tr>
+            <tr><td>Humedad Mínima</td><td id="dia-hmin" class="loading">Cargando...</td></tr>
+            <tr><td>Presión Máxima</td><td id="dia-pmax" class="loading">Cargando...</td></tr>
+            <tr><td>Presión Mínima</td><td id="dia-pmin" class="loading">Cargando...</td></tr>
+            <tr><td>Racha Máxima de Viento</td><td id="dia-vmax" class="loading">Cargando...</td></tr>
+            <tr><td>Radiación Solar Máxima</td><td id="dia-rmax" class="loading">Cargando...</td></tr>
+            <tr><td>Índice UV Máximo</td><td id="dia-uvmax" class="loading">Cargando...</td></tr>
+        </tbody>
+    </table>
+</div>
+<!-- BLOQUE 3: EXTREMOS MENSUALES -->
+<div class="current-table">
+    <table>
+        <thead>
+            <tr><th colspan="2">Extremos del Mes</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Temperatura Máxima</td><td id="mes-tmax" class="maxima loading">Cargando...</td></tr>
+            <tr><td>Temperatura Mínima</td><td id="mes-tmin" class="minima loading">Cargando...</td></tr>
+            <tr><td>Humedad Máxima</td><td id="mes-hmax" class="loading">Cargando...</td></tr>
+            <tr><td>Humedad Mínima</td><td id="mes-hmin" class="loading">Cargando...</td></tr>
+            <tr><td>Presión Máxima</td><td id="mes-pmax" class="loading">Cargando...</td></tr>
+            <tr><td>Presión Mínima</td><td id="mes-pmin" class="loading">Cargando...</td></tr>
+            <tr><td>Racha Máxima de Viento</td><td id="mes-vmax" class="loading">Cargando...</td></tr>
+            <tr><td>Radiación Solar Máxima</td><td id="mes-rmax" class="loading">Cargando...</td></tr>
+            <tr><td>Índice UV Máximo</td><td id="mes-uvmax" class="loading">Cargando...</td></tr>
+            <tr><td>Lluvia Acumulada del Mes</td><td id="mes-ppt" class="loading">Cargando...</td></tr>
+        </tbody>
+    </table>
+</div>
 
-                document.getElementById("meteo-fecha").textContent = actuales.HORA ? `${actuales.DATA || ''} a las ${actuales.HORA}` : "--";
-                document.getElementById("meteo-temp").textContent = actuales.TEMP !== undefined ? `${actuales.TEMP} °C` : "--";
-                document.getElementById("meteo-hum").textContent = actuales.HUM !== undefined ? `${actuales.HUM} %` : "--";
-                document.getElementById("meteo-viento").textContent = actuales.VEL !== undefined ? `${actuales.VEL} km/h (${actuales.DIR || ''})` : "--";
-                document.getElementById("meteo-presion").textContent = actuales.BAR !== undefined ? `${actuales.BAR} hPa` : "--";
-                document.getElementById("meteo-lluvia").textContent = actuales.PREC !== undefined ? `${actuales.PREC} mm` : "--";
+<!-- BLOQUE 4: EXTREMOS ANUALES -->
+<div class="current-table">
+    <table>
+        <thead>
+            <tr><th colspan="2">Extremos del Año</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Temperatura Máxima</td><td id="any-tmax" class="maxima loading">Cargando...</td></tr>
+            <tr><td>Temperatura Mínima</td><td id="any-tmin" class="minima loading">Cargando...</td></tr>
+            <tr><td>Humedad Máxima</td><td id="any-hmax" class="loading">Cargando...</td></tr>
+            <tr><td>Humedad Mínima</td><td id="any-hmin" class="loading">Cargando...</td></tr>
+            <tr><td>Presión Máxima</td><td id="any-pmax" class="loading">Cargando...</td></tr>
+            <tr><td>Presión Mínima</td><td id="any-pmin" class="loading">Cargando...</td></tr>
+            <tr><td>Racha Máxima de Viento</td><td id="any-vmax" class="loading">Cargando...</td></tr>
+            <tr><td>Radiación Solar Máxima</td><td id="any-rmax" class="loading">Cargando...</td></tr>
+            <tr><td>Índice UV Máximo</td><td id="any-uvmax" class="loading">Cargando...</td></tr>
+            <tr><td>Lluvia Acumulada del Año</td><td id="any-ppt" class="loading">Cargando...</td></tr>
+        </tbody>
+    </table>
+</div>
 
-                // Retirar clases de carga de forma limpia
-                document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
+<script>
+async function cargarMeteoCompleto() {
+    // Apunta de forma local al archivo que actualiza tu GitHub Action
+    const url = "./datos.json";
 
-            } catch (error) {
-                console.error("Error al procesar el JSON:", error);
-                document.querySelectorAll('.loading').forEach(el => el.textContent = "Error");
-            }
-        }
-
-        // Carga inicial al desplegar
-        document.addEventListener("DOMContentLoaded", cargarDatosMeteo);
+    try {
+        const respuesta = await fetch(url);
+        if (!respuesta.ok) throw new Error("Fallo al abrir el archivo local");
         
-        // Auto-refresco en segundo plano cada 5 minutos por si el usuario deja la pestaña abierta
-        setInterval(cargarDatosMeteo, 300000);
-    </script>
+        const json = await respuesta.json();
+        
+        const act = json.dades_act;
+        const dia = json.dades_dia;
+        const mes = json.dades_mes;
+        const any = json.dades_any;
+
+        // Inyección de la hora de actualización en el banner superior
+        document.getElementById("m-fecha-top").textContent = `${act.DATA} a las ${act.HORA}`;
+
+        // 1. Mapeo de Datos Actuales (con UV y Radiación Solar incluidos)
+        document.getElementById("act-temp").textContent = `${act.TEMP} °C`;
+        document.getElementById("act-hum").textContent = `${act.HUM} %`;
+        document.getElementById("act-bar").textContent = `${act.BAR} hPa`;
+        document.getElementById("act-vel").textContent = `${act.VEL} km/h (${act.DIR})`;
+        document.getElementById("act-sun").textContent = act.SUN !== undefined ? `${act.SUN} W/m²` : "--";
+        document.getElementById("act-uvi").textContent = act.UVI !== undefined ? act.UVI : "--";
+        document.getElementById("act-prec").textContent = `${act.PREC} mm`;
+        document.getElementById("act-pint").textContent = act.PINT !== undefined ? `${act.PINT} mm/h` : "--";
+
+        // 2. Mapeo de Extremos Diarios
+        document.getElementById("dia-tmax").textContent = `${dia.TMax_d} °C`;
+        document.getElementById("dia-tmin").textContent = `${dia.TMin_d} °C`;
+        document.getElementById("dia-hmax").textContent = `${dia.HMax_d} %`;
+        document.getElementById("dia-hmin").textContent = `${dia.HMin_d} %`;
+        document.getElementById("dia-pmax").textContent = `${dia.PMax_d} hPa`;
+        document.getElementById("dia-pmin").textContent = `${dia.PMin_d} hPa`;
+        document.getElementById("dia-vmax").textContent = `${dia.VMax_d} km/h`;
+        document.getElementById("dia-rmax").textContent = dia.RMax_d !== undefined ? `${dia.RMax_d} W/m²` : "--";
+        document.getElementById("dia-uvmax").textContent = dia.UVMax_d !== undefined ? dia.UVMax_d : "--";
+
+        // 3. Mapeo de Extremos Mensuales
+        document.getElementById("mes-tmax").textContent = `${mes.TMax_m} °C`;
+        document.getElementById("mes-tmin").textContent = `${mes.TMin_m} °C`;
+        document.getElementById("mes-hmax").textContent = `${mes.HMax_m} %`;
+        document.getElementById("mes-hmin").textContent = `${mes.HMin_m} %`;
+        document.getElementById("mes-pmax").textContent = `${mes.PMax_m} hPa`;
+        document.getElementById("mes-pmin").textContent = `${mes.PMin_m} hPa`;
+        document.getElementById("mes-vmax").textContent = `${mes.VMax_m} km/h`;
+        document.getElementById("mes-rmax").textContent = mes.RMax_m !== undefined ? `${mes.RMax_m} W/m²` : "--";
+        document.getElementById("mes-uvmax").textContent = mes.UVMax_m !== undefined ? mes.UVMax_m : "--";
+        document.getElementById("mes-ppt").textContent = `${mes.PPT_m} mm`;
+
+        // 4. Mapeo de Extremos Anuales
+        document.getElementById("any-tmax").textContent = `${any.TMax_a} °C`;
+        document.getElementById("any-tmin").textContent = `${any.TMin_a} °C`;
+        document.getElementById("any-hmax").textContent = `${any.HMax_a} %`;
+        document.getElementById("any-hmin").textContent = `${any.HMin_a} %`;
+        document.getElementById("any-pmax").textContent = `${any.PMax_a} hPa`;
+        document.getElementById("any-pmin").textContent = `${any.PMin_a} hPa`;
+        document.getElementById("any-vmax").textContent = `${any.VMax_a} km/h`;
+        document.getElementById("any-rmax").textContent = any.RMax_a !== undefined ? `${any.RMax_a} W/m²` : "--";
+        document.getElementById("any-uvmax").textContent = any.UVMax_a !== undefined ? any.UVMax_a : "--";
+        document.getElementById("any-ppt").textContent = `${any.PPT_a} mm`;
+
+        // Eliminar animaciones intermitentes una vez renderizado todo
+        document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
+
+    } catch (error) {
+        console.error("Error al procesar el dashboard:", error);
+        document.querySelectorAll('.loading').forEach(el => el.textContent = "Error");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", cargarMeteoCompleto);
+</script>
 
 </body>
 </html>
+    
