@@ -2,9 +2,13 @@ name: Actualizar Datos Meteo
 
 on:
   schedule:
-    # Se ejecuta cada 15 minutos (GitHub Actions puede tardar unos minutos más según saturación)
+    # Se ejecuta cada 15 minutos
     - cron: '*/15 * * * *'
   workflow_dispatch: # Permite activar el script manualmente desde la pestaña "Actions"
+
+# ESTE BLOQUE ES CRÍTICO: Da permisos para hacer push de vuelta al repositorio
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -20,7 +24,7 @@ jobs:
     - name: Confirmar y subir cambios
       run: |
         git config --global user.name "github-actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@://github.com"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add datos.json
         # Solo hace commit si el archivo ha cambiado para no ensuciar el historial innecesariamente
         git diff --quiet && git diff --staged --quiet || (git commit -m "Meteo: Datos actualizados automáticamente" && git push)
