@@ -1,193 +1,132 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeteoCullera Dashboard Completo</title>
+    <title>MeteoCullera Dashboard</title>
     <style>
         :root {
-            --card: rgba(255, 255, 255, 0.94);
-            --text: #1f2937;
-            --muted: #4b5563;
-            --brand: #2563eb;
-            --border: rgba(31, 41, 55, .14);
-            --bg-sub: rgba(243, 244, 246, 0.7);
-            --high: #dc2626;
-            --low: #2563eb;
+            --card: rgba(255, 255, 255, 0.95); --text: #1f2937; --muted: #4b5563;
+            --brand: #2563eb; --border: rgba(31, 41, 55, .14);
+            --bg-sub: rgba(243, 244, 246, 0.7); --high: #dc2626; --low: #2563eb;
         }
-        body {
-            margin: 0;
-            padding: 4px;
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-            color: var(--text);
-            background: transparent;
-            overflow-x: hidden;
-        }
-        .dashboard-container {
-            width: 100%;
-            max-width: 326px;
-            box-sizing: border-box;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-            overflow: hidden;
-        }
-        .station-header {
-            text-align: center;
-            padding: 12px 10px 8px;
-            background: #f8fafc;
-            border-bottom: 1px solid var(--border);
-        }
-        .station-title {
-            font-size: 15px;
-            font-weight: 900;
-            color: var(--brand);
-            margin: 0;
-            letter-spacing: 0.5px;
-        }
-        .update-tag {
-            font-size: 11px;
-            color: var(--muted);
-            margin-top: 3px;
-        }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .data-row {
-            border-top: 1px solid #e5e7eb;
-        }
-        td {
-            padding: 8px 12px;
-            font-size: 13.5px;
-        }
-        td.label {
-            color: var(--muted);
-            font-weight: 600;
-        }
-        td.val {
-            font-weight: 700;
-            text-align: right;
-            color: #111827;
-        }
-        .historical-grid {
-            background: var(--bg-sub);
-            padding: 6px 12px;
-            font-size: 11px;
-            border-bottom: 1px solid #e5e7eb;
-            color: #374151;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-        .hist-item {
-            display: flex;
-            justify-content: space-between;
-        }
-        .time-tag {
-            font-size: 9.5px;
-            color: #6b7280;
-            margin-left: 2px;
-        }
+        body { margin: 0; padding: 10px; font-family: system-ui, -apple-system, sans-serif; color: var(--text); background: transparent; }
+        .dashboard-container { width: 100%; max-width: 1100px; margin: 0 auto; box-sizing: border-box; }
+        .station-header { text-align: center; padding: 16px 10px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; }
+        .station-title { font-size: 18px; font-weight: 900; color: var(--brand); margin: 0; letter-spacing: 0.5px; }
+        .update-tag { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        .grid-layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        @media (min-width: 850px) { .grid-layout { grid-template-columns: repeat(3, 1fr); } }
+        .block-section { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--card); display: flex; flex-direction: column; }
+        .block-title { background: #f3f4f6; color: #374151; font-weight: 700; font-size: 12.5px; padding: 10px 14px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-row { border-top: 1px solid #e5e7eb; }
+        td { padding: 9px 14px; font-size: 13.5px; }
+        td.label { color: var(--muted); font-weight: 600; }
+        td.val { font-weight: 700; text-align: right; color: #111827; }
+        .historical-grid { background: var(--bg-sub); padding: 7px 14px; font-size: 11px; border-bottom: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 4px; }
+        .hist-item { display: flex; justify-content: space-between; }
+        .time-tag { font-size: 9.5px; color: #6b7280; margin-left: 2px; }
         .t-high { color: var(--high); font-weight: 600; }
         .t-low { color: var(--low); font-weight: 600; }
         .sub-text { font-size: 11px; color: #6b7280; font-weight: normal; }
     </style>
 </head>
 <body>
-
     <div class="dashboard-container">
         <div class="station-header">
             <h2 class="station-title" id="st-name">📍 Cargando estación...</h2>
             <div class="update-tag" id="st-time">Conectando...</div>
         </div>
+        <div class="grid-layout">
+ <!-- COLUMNA 1: AMBIENTE -->
+            <div class="block-section">
+                <div class="block-title">🌡️ Temperatura y Humedad</div>
+                <table class="data-table">
+                    <tr class="data-row"><td class="label">Temperatura</td><td class="val" id="v-temp" style="color: var(--brand); font-size: 14.5px;">--</td></tr>
+                    <tr><td colspan="2" style="padding:0;">
+                        <div class="historical-grid">
+                            <div class="hist-item"><span>Hoy Máx: <span class="t-high" id="t-dh">--</span><span class="time-tag" id="t-dht"></span></span><span>Mín: <span class="t-low" id="t-dl">--</span><span class="time-tag" id="t-dlt"></span></span></div>
+                            <div class="hist-item"><span>Mes Máx: <span class="t-high" id="t-mh">--</span></span><span>Mín: <span class="t-low" id="t-ml">--</span></span></div>
+                            <div class="hist-item"><span>Año Máx: <span class="t-high" id="t-yh">--</span></span><span>Mín: <span class="t-low" id="t-yl">--</span></span></div>
+                        </div>
+                    </td></tr>
+                    <tr class="data-row"><td class="label">Humedad Relativa</td><td class="val" id="v-hum">--</td></tr>
+                    <tr><td colspan="2" style="padding:0;">
+                        <div class="historical-grid">
+                            <div class="hist-item"><span>Hoy Máx: <span id="h-dh">--</span><span class="time-tag" id="h-dht"></span></span><span>Mín: <span id="h-dl">--</span><span class="time-tag" id="h-dlt"></span></span></div>
+                            <div class="hist-item"><span>Mes Máx: <span id="h-mh">--</span></span><span>Mín: <span id="h-ml">--</span></span></div>
+                            <div class="hist-item"><span>Año Máx: <span id="h-yh">--</span></span><span>Mín: <span id="h-yl">--</span></span></div>
+                        </div>
+                    </td></tr>
+                </table>
+            </div>
 
-        <table class="data-table">
-            <!-- TEMPERATURA -->
-            <tr class="data-row"><td class="label">Temperatura</td><td class="val" id="v-temp" style="color: var(--brand); font-size: 14.5px;">--</td></tr>
-            <tr><td colspan="2" style="padding:0;">
-                <div class="historical-grid">
-                    <div class="hist-item"><span>Hoy Máx: <span class="t-high" id="t-dh">--</span><span class="time-tag" id="t-dht"></span></span><span>Mín: <span class="t-low" id="t-dl">--</span><span class="time-tag" id="t-dlt"></span></span></div>
-                    <div class="hist-item"><span>Mes Máx: <span class="t-high" id="t-mh">--</span></span><span>Mín: <span class="t-low" id="t-ml">--</span></span></div>
-                    <div class="hist-item"><span>Año Máx: <span class="t-high" id="t-yh">--</span></span><span>Mín: <span class="t-low" id="t-yl">--</span></span></div>
-                </div>
-            </td></tr>
-
-            <!-- HUMEDAD -->
-            <tr class="data-row"><td class="label">Humedad Relativa</td><td class="val" id="v-hum">--</td></tr>
-            <tr><td colspan="2" style="padding:0;">
-                <div class="historical-grid">
-                    <div class="hist-item"><span>Hoy Máx: <span id="h-dh">--</span><span class="time-tag" id="h-dht"></span></span><span>Mín: <span id="h-dl">--</span><span class="time-tag" id="h-dlt"></span></span></div>
-                    <div class="hist-item"><span>Mes Máx: <span id="h-mh">--</span></span><span>Mín: <span id="h-ml">--</span></span></div>
-                    <div class="hist-item"><span>Año Máx: <span id="h-yh">--</span></span><span>Mín: <span id="h-yl">--</span></span></div>
-                </div>
-            </td></tr>
-
-            <!-- PRESIÓN -->
-            <tr class="data-row"><td class="label">Presión Atmosférica</td><td class="val" id="v-pres">--</td></tr>
-            <tr><td colspan="2" style="padding:0;">
-                <div class="historical-grid">
-                    <div class="hist-item"><span>Hoy Máx: <span id="p-dh">--</span></span><span>Mín: <span id="p-dl">--</span></span></div>
-                    <div class="hist-item"><span>Mes Máx: <span id="p-mh">--</span></span><span>Mín: <span id="p-ml">--</span></span></div>
-                    <div class="hist-item"><span>Año Máx: <span id="p-yh">--</span></span><span>Mín: <span id="p-yl">--</span></span></div>
-                </div>
-            </td></tr>
-             <!-- PUNTO DE ROCÍO -->
-            <tr class="data-row"><td class="label">Punto de Rocío</td><td class="val" id="v-dew">--</td></tr>
-            <tr><td colspan="2" style="padding:0;">
-                <div class="historical-grid">
-                    <div class="hist-item"><span>Hoy Máx: <span id="d-dh">--</span></span><span>Mín: <span id="d-dl">--</span></span></div>
-                    <div class="hist-item"><span>Mes Máx: <span id="d-mh">--</span></span><span>Mín: <span id="d-ml">--</span></span></div>
-                    <div class="hist-item"><span>Año Máx: <span id="d-yh">--</span></span><span>Mín: <span id="d-yl">--</span></span></div>
-                </div>
-            </td></tr>
-
-            <!-- ÍNDICE DE CALOR -->
-            <tr class="data-row"><td class="label">Índice de Calor</td><td class="val" id="v-heat">--</td></tr>
-            <tr><td colspan="2" style="padding:0;">
-                <div class="historical-grid">
-                    <div class="hist-item"><span>Hoy Máx: <span class="t-high" id="hi-dh">--</span></span><span>Mes Máx: <span class="t-high" id="hi-mh">--</span></span><span>Año Máx: <span class="t-high" id="hi-yh">--</span></span></div>
-                </div>
-            </td></tr>
-
-            <!-- VIENTO -->
-            <tr class="data-row"><td class="label">Viento (Vel. y Racha)</td><td class="val" id="v-wind">--</td></tr>
-            <tr><td colspan="2" style="padding:0;">
-                <div class="historical-grid">
-                    <div class="hist-item"><span>Hoy Racha Máx: <strong id="w-dh">--</strong><span class="time-tag" id="w-dht"></span></span></div>
-                    <div class="hist-item"><span>Mes Racha Máx: <strong id="w-mh">--</strong></span></div>
-                    <div class="hist-item"><span>Año Racha Máx: <strong id="w-yh">--</strong></span></div>
-                </div>
-            </td></tr>
-
-            <!-- PRECIPITACIÓN -->
-            <tr class="data-row"><td class="label">Precipitación</td><td class="val" id="v-rain">--</td></tr>
-            <tr><td colspan="2" style="padding:0;">
-                <div class="historical-grid">
-                    <div class="hist-item"><span>Hoy: <strong id="r-day">--</strong></span><span>Mes: <strong id="r-mon">--</strong></span><span>Año: <strong id="r-year">--</strong></span></div>
-                    <div class="hist-item"><span>Intensidad Máx Hoy: <span id="r-ratemax">--</span><span class="time-tag" id="r-ratetime"></span></span></div>
-                </div>
-            </td></tr>
-
-            <!-- RADIACIÓN SOLAR -->
-            <tr class="data-row"><td class="label">Radiación Solar</td><td class="val" id="v-solar">--</td></tr>
-            <tr><td colspan="2" style="padding:0;">
-                <div class="historical-grid">
-                    <div class="hist-item"><span>Hoy Máx: <span id="s-dh">--</span><span class="time-tag" id="s-dht"></span></span></div>
-                    <div class="hist-item"><span>Mes Máx: <span id="s-mh">--</span></span><span>Año Máx: <span id="s-yh">--</span></span></div>
-                </div>
-            </td></tr>
-
-            <!-- ÍNDICE UV -->
-            <tr class="data-row"><td class="label">Índice UV</td><td class="val" id="v-uv">--</td></tr>
-            <tr><td colspan="2" style="padding:0;">
-                <div class="historical-grid">
-                    <div class="hist-item"><span>Hoy Máx: <span id="u-dh">--</span><span class="time-tag" id="u-dht"></span></span></div>
-                    <div class="hist-item"><span>Mes Máx: <span id="u-mh">--</span></span><span>Año Máx: <span id="u-yh">--</span></span></div>
-                </div>
-            </td></tr>
-        </table>
+            <!-- COLUMNA 2: DINÁMICA DE VIENTOS -->
+            <div class="block-section">
+                <div class="block-title">💨 Vientos y Confort</div>
+                <table class="data-table">
+                    <tr class="data-row"><td class="label">Viento (Vel. y Racha)</td><td class="val" id="v-wind">--</td></tr>
+                    <tr><td colspan="2" style="padding:0;">
+                        <div class="historical-grid">
+                            <div class="hist-item"><span>Hoy Racha Máx: <strong id="w-dh">--</strong><span class="time-tag" id="w-dht"></span></span></div>
+                            <div class="hist-item"><span>Mes Racha Máx: <strong id="w-mh">--</strong></span></div>
+                            <div class="hist-item"><span>Año Racha Máx: <strong id="w-yh">--</strong></span></div>
+                        </div>
+                    </td></tr>
+                    <tr class="data-row"><td class="label">Punto de Rocío</td><td class="val" id="v-dew">--</td></tr>
+                    <tr><td colspan="2" style="padding:0;">
+                        <div class="historical-grid">
+                            <div class="hist-item"><span>Hoy Máx: <span id="d-dh">--</span></span><span>Mín: <span id="d-dl">--</span></span></div>
+                            <div class="hist-item"><span>Mes Máx: <span id="d-mh">--</span></span><span>Mín: <span id="d-ml">--</span></span></div>
+                            <div class="hist-item"><span>Año Máx: <span id="d-yh">--</span></span><span>Mín: <span id="d-yl">--</span></span></div>
+                        </div>
+                    </td></tr>
+                    <tr class="data-row"><td class="label">Índice de Calor</td><td class="val" id="v-heat">--</td></tr>
+                    <tr><td colspan="2" style="padding:0;">
+                        <div class="historical-grid">
+                            <div class="hist-item"><span>Hoy Máx: <span class="t-high" id="hi-dh">--</span></span><span>Mes Máx: <span class="t-high" id="hi-mh">--</span></span><span>Año Máx: <span class="t-high" id="hi-yh">--</span></span></div>
+                        </div>
+                    </td></tr>
+                </table>
+            </div>
+<!-- COLUMNA 3: PRECIPITACIÓN Y ENERGÍA -->
+            <div class="block-section">
+                <div class="block-title">🌧️ Presión, Lluvia y Sol</div>
+                <table class="data-table">
+                    <tr class="data-row"><td class="label">Presión Atmosférica</td><td class="val" id="v-pres">--</td></tr>
+                    <tr><td colspan="2" style="padding:0;">
+                        <div class="historical-grid">
+                            <div class="hist-item"><span>Hoy Máx: <span id="p-dh">--</span></span><span>Mín: <span id="p-dl">--</span></span></div>
+                            <div class="hist-item"><span>Mes Máx: <span id="p-mh">--</span></span><span>Mín: <span id="p-ml">--</span></span></div>
+                            <div class="hist-item"><span>Año Máx: <span id="p-yh">--</span></span><span>Mín: <span id="p-yl">--</span></span></div>
+                        </div>
+                    </td></tr>
+                    <tr class="data-row"><td class="label">Precipitación</td><td class="val" id="v-rain">--</td></tr>
+                    <tr><td colspan="2" style="padding:0;">
+                        <div class="historical-grid">
+                            <div class="hist-item"><span>Hoy: <strong id="r-day">--</strong></span><span>Mes: <strong id="r-mon">--</strong></span><span>Año: <strong id="r-year">--</strong></span></div>
+                            <div class="hist-item"><span>Intensidad Máx Hoy: <span id="r-ratemax">--</span><span class="time-tag" id="r-ratetime"></span></span></div>
+                        </div>
+                    </td></tr>
+                    <tr class="data-row"><td class="label">Radiación Solar</td><td class="val" id="v-solar">--</td></tr>
+                    <tr><td colspan="2" style="padding:0;">
+                        <div class="historical-grid">
+                            <div class="hist-item"><span>Hoy Máx: <span id="s-dh">--</span><span class="time-tag" id="s-dht"></span></span></div>
+                            <div class="hist-item"><span>Mes Máx: <span id="s-mh">--</span></span><span>Año Máx: <span id="s-yh">--</span></span></div>
+                        </div>
+                    </td></tr>
+                    <tr class="data-row"><td class="label">Índice UV</td><td class="val" id="v-uv">--</td></tr>
+                    <tr><td colspan="2" style="padding:0;">
+                        <div class="historical-grid">
+                            <div class="hist-item"><span>Hoy Máx: <span id="u-dh">--</span><span class="time-tag" id="u-dht"></span></span></div>
+                            <div class="hist-item"><span>Mes Máx: <span id="u-mh">--</span></span><span>Año Máx: <span id="u-yh">--</span></span></div>
+                        </div>
+                    </td></tr>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -253,7 +192,7 @@
                 setTxt('r-ratemax', inMmHr(davis.rain_rate_day_high_in_per_hr)); setTxt('r-ratetime', davis.rain_rate_day_high_time);
                 
                 setTxt('v-solar', davis.solar_radiation + " W/m²");
-                setTxt('s-dh', d.solar_radiation_day_high + " W/m²"); setTxt('s-dht', davis.solar_radiation_day_high_time);
+                setTxt('s-dh', davis.solar_radiation_day_high + " W/m²"); setTxt('s-dht', davis.solar_radiation_day_high_time);
                 setTxt('s-mh', davis.solar_radiation_month_high + " W/m²"); setTxt('s-yh', davis.solar_radiation_year_high + " W/m²");
                 
                 setTxt('v-uv', davis.uv_index);
@@ -266,4 +205,4 @@
             });
     </script>
 </body>
-</html>
+</html>            
