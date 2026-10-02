@@ -1,13 +1,15 @@
 import requests
 import json
 
+# Tu URL exacta de WeatherLink
 url = "https://api.weatherlink.com/v1/NoaaExt.json?user=001D0AE0D724&pass=semiuncial4&apiToken=BB6FD1E154A74270A0A613E9C2CFAAEE"
 
 try:
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     data = response.json()
     davis = data.get("davis_current_observation", {})
     
+    # --- FUNCIONES MATEMÁTICAS DE CONVERSIÓN ---
     def f_to_c(f_val):
         try: return str(round((float(f_val) - 32) * 5 / 9, 1)) + " °C"
         except: return "N/A"
@@ -27,6 +29,7 @@ try:
     def get_raw(val, unit=""):
         return f"{val} {unit}".strip() if val is not None else "N/A"
 
+    # --- INYECCIÓN DE VARIABLES PROVENIENTES DEL JSON ---
     replacements = {
         "{{STATION_NAME}}": get_raw(davis.get("station_name"), ""),
         "{{OBS_TIME}}": get_raw(data.get("observation_time"), ""),
@@ -118,16 +121,19 @@ try:
         "{{RAIN_RATE_YEAR_HIGH}}": in_hr_to_mm_hr(davis.get("rain_rate_year_high_in_per_hr")),
     }
 
+    # Leer la plantilla html
     with open("template.html", "r", encoding="utf-8") as f:
         html = f.read()
 
+    # Intercambiar etiquetas por valores del JSON
     for key, value in replacements.items():
         html = html.replace(key, value)
 
+    # Escribir el archivo final incrustable
     with open("dashboard.html", "w", encoding="utf-8") as f:
         f.write(html)
         
-    print("Dashboard generado correctamente.")
+    print("Dashboard generado correctamente en dashboard.html")
 
 except Exception as e:
-    print(f"Error: {e}")
+    print(f"Error procesando el script: {e}")
