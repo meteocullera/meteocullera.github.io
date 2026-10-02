@@ -1,7 +1,7 @@
 import requests
 import json
 
-url = "https://weatherlink.com"
+url = "https://api.weatherlink.com/v1/NoaaExt.json?user=001D0AE0D724&pass=semiuncial4&apiToken=BB6FD1E154A74270A0A613E9C2CFAAEE"
 
 try:
     response = requests.get(url)
