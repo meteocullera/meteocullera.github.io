@@ -2,19 +2,22 @@ name: Actualizar Clima Automático
 
 on:
   schedule:
-    # Esto le dice a GitHub que despierte cada 5 minutos
     - cron: '*/15 * * * *'
-  workflow_dispatch: # Esto nos permite probar el botón a mano cuando queramos
+  workflow_dispatch:
+
+# Permisos necesarios para guardar clima.json en el repositorio
+permissions:
+  contents: write
 
 jobs:
   actualizar:
     runs-on: ubuntu-latest
     steps:
     - name: Descargar el código del repositorio
-      uses: actions/checkout@v4.2.2 # Versión actualizada estable
+      uses: actions/checkout@v4.2.2
 
     - name: Configurar Python
-      uses: actions/setup-python@v5.4.0 # Versión actualizada estable
+      uses: actions/setup-python@v5.4.0
       with:
         python-version: '3.x'
 
@@ -26,7 +29,8 @@ jobs:
         WEATHERLINK_API_KEY: ${{ secrets.WEATHERLINK_API_KEY }}
         WEATHERLINK_API_SECRET: ${{ secrets.WEATHERLINK_API_SECRET }}
         WEATHERLINK_STATION_ID: ${{ secrets.WEATHERLINK_STATION_ID }}
-      run: python actualizar_clima.py
+      # CAMBIA 'scripts/' por el nombre real de tu carpeta si es diferente
+      run: actualizar_clima.py
 
     - name: Guardar los cambios en el repositorio
       run: |
