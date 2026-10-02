@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeteoCullera Dashboard Simplificado</title>
+    <style>
+        /* Mapeo directo de la paleta y fuentes de tu web principal */
+        :root {
+            --card: rgba(255, 255, 255, 0.94);
+            --text: #1f2937;
+            --muted: #4b5563;
+            --brand: #2563eb;
+            --border: rgba(31, 41, 55, .14);
+        }
+        body {
+            margin: 0;
+            padding: 4px;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            color: var(--text);
+            background: transparent;
+            overflow: hidden;
+        }
+        .dashboard-container {
+            width: 100%;
+            max-width: 326px;
+            box-sizing: border-box;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            overflow: hidden;
+        }
+        .station-header {
+            text-align: center;
+            padding: 12px 10px 8px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+        }
+        .station-title {
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--brand);
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+        .update-tag {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-row {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .data-row:last-child {
+            border-bottom: none;
+        }
+        td {
+            padding: 10px 12px;
+            font-size: 13.5px;
+        }
+        td.label {
+            color: var(--muted);
+            font-weight: 500;
+        }
+        td.val {
+            font-weight: 700;
+            text-align: right;
+            color: #111827;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div class="station-header">
+            <h2 class="station-title" id="st-name">📍 Cargando estación...</h2>
+            <div class="update-tag" id="st-time">Conectando...</div>
+        </div>
+
+        <table class="data-table">
+            <tr class="data-row"><td class="label">Temperatura</td><td class="val" id="v-temp" style="color: var(--brand); font-size: 14.5px;">--</td></tr>
+            <tr class="data-row"><td class="label">Humedad Relativa</td><td class="val" id="v-hum">--</td></tr>
+            <tr class="data-row"><td class="label">Presión Atmosférica</td><td class="val" id="v-pres">--</td></tr>
+            <tr class="data-row"><td class="label">Punto de Rocío</td><td class="val" id="v-dew">--</td></tr>
+            <tr class="data-row"><td class="label">Índice de Calor</td><td class="val" id="v-heat">--</td></tr>
+            <tr class="data-row"><td class="label">Viento (Vel. y Dir.)</td><td class="val" id="v-wind">--</td></tr>
+            <tr class="data-row"><td class="label">Precipitación Hoy</td><td class="val" id="v-rain">--</td></tr>
+            <tr class="data-row"><td class="label">Radiación Solar</td><td class="val" id="v-solar">--</td></tr>
+            <tr class="data-row"><td class="label">Índice UV</td><td class="val" id="v-uv">--</td></tr>
+        </table>
+    </div>
+
+    <script>
+        // Funciones de conversión a sistema métrico europeo
+        const mphToKmh = m => m ? (parseFloat(m) * 1.60934).toFixed(1) + " km/h" : "0.0 km/h";
+        const inToMm = i => i ? (parseFloat(i) * 25.4).toFixed(1) + " mm" : "0.0 mm";
+        const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
+
+        // fetch llama al archivo local que guarda tu Github Action (rompiendo caché con Date.now)
+        fetch('estacion.json?v=' + Date.now())
+            .then(res => res.json())
+            .then(data => {
+                const davis = data.davis_current_observation || {};
+                
+                setTxt('st-name', "📍 " + (davis.station_name || "Cullera-Sant Antoni"));
+                setTxt('st-time', data.observation_time || "--");
+                
+                // Mapear variables directas en el formato solicitado
+                setTxt('v-temp', data.temp_c + " °C");
+                setTxt('v-hum', data.relative_humidity + "%");
+                setTxt('v-pres', data.pressure_mb + " hPa");
+                setTxt('v-dew', data.dewpoint_c + " °C");
+                setTxt('v-heat', data.heat_index_c + " °C");
+                
+                // Viento combinado (Velocidad + Dirección)
+                const vWind = mphToKmh(data.wind_mph);
+                const dWind = data.wind_dir || "";
+                setTxt('v-wind', `${vWind} ${dWind}`);
+                
+                // Lluvia hoy, radiación e índice UV
+                setTxt('v-rain', inToMm(davis.rain_day_in));
+                setTxt('v-solar', davis.solar_radiation + " W/m²");
+                setTxt('v-uv', davis.uv_index);
+            })
+            .catch(err => {
+                console.error("Error al procesar el JSON local:", err);
+                setTxt('st-time', "Error de sincronización local");
+            });
+    </script>
+</body>
+</html>
