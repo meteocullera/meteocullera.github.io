@@ -29,6 +29,6 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@://github.com"
-        git add index.html
+        git add dashboard.html
         git diff-index --quiet HEAD || git commit -m "Meteo: Datos actualizados automáticamente"
         git push origin main
