@@ -124,7 +124,7 @@ try:
     for key, value in replacements.items():
         html = html.replace(key, value)
 
-    with open("index.html", "w", encoding="utf-8") as f:
+    with open("dashboard.html", "w", encoding="utf-8") as f:
         f.write(html)
         
     print("Dashboard generado correctamente.")
