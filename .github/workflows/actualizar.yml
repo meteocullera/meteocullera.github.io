@@ -1,48 +1,36 @@
-name: Actualizar Datos de la Estación
+name: Guardar Datos de la Estación
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # Se ejecuta cada 15 minutos automáticamente
-  workflow_dispatch: # Permite ejecución manual con el botón
+    - cron: '*/15 * * * *' # Se ejecuta automáticamente cada 15 minutos
+  workflow_dispatch: # Activa el botón para hacer pruebas manuales
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Permiso explícito de escritura para el token interno
+      contents: write # Permite al robot guardar el archivo JSON resultante
     steps:
-    - name: 1. Clonar el repositorio
+    - name: 1. Descargar repositorio en el servidor
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
-    - name: 2. Configurar Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
+    - name: 2. Descargar el JSON directo de WeatherLink
+      run: |
+        curl -s "https://weatherlink.com" -o estacion.json
 
-    - name: 3. Instalar librería de peticiones
-      run: pip install requests
-
-    - name: 4. Ejecutar el script meteorológico
-      run: python script.py
-
-    - name: 5. Subir cambios con autenticación reforzada
+    - name: 3. Guardar el JSON actualizado en tu repositorio
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@://github.com"
         
-        # Sincronizar cambios por si acaso
         git pull origin HEAD
-        
-        git add dashboard.html
+        git add estacion.json
         
         if ! git diff-index --quiet HEAD; then
-          git commit -m "Meteo: Dashboard actualizado automáticamente"
-          # Autentica el push usando el token dinámico de la tarea para evitar el error 128
+          git commit -m "Meteo: Archivo JSON actualizado automáticamente"
           git push https://x-access-token:${GH_TOKEN}@://github.com{{ github.repository }}.git HEAD
         else
-          echo "Sin cambios detectados en los datos. No se requiere actualización."
+          echo "Los datos no han cambiado. No es necesario actualizar."
         fi
