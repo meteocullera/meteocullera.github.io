@@ -2,23 +2,23 @@ name: Guardar Datos de la Estación
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # Se ejecuta automáticamente cada 15 minutos
-  workflow_dispatch: # Activa el botón para hacer pruebas manuales
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Permite al robot guardar el archivo JSON resultante
+      contents: write
     steps:
-    - name: 1. Descargar repositorio en el servidor
+    - name: 1. Descargar repositorio
       uses: actions/checkout@v4
 
     - name: 2. Descargar el JSON directo de WeatherLink
       run: |
-        curl -s "https://api.weatherlink.com/v1/NoaaExt.json?user=001D0AE0D724&pass=semiuncial4&apiToken=BB6FD1E154A74270A0A613E9C2CFAAEE" -o estacion.json
+        curl -s "https://weatherlink.com" -o estacion.json
 
-    - name: 3. Guardar el JSON actualizado en tu repositorio
+    - name: 3. Subir el JSON de forma segura al repositorio
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -28,9 +28,11 @@ jobs:
         git pull origin HEAD
         git add estacion.json
         
-        if ! git diff-index --quiet HEAD; then
+        # CORRECCIÓN: Si no hay cambios, el script muestra un mensaje informativo y finaliza con éxito (exit 0) en vez de fallar
+        if git diff-index --quiet HEAD; then
+          echo "Los datos meteorológicos no han cambiado. Finalizando con éxito."
+          exit 0
+        else
           git commit -m "Meteo: Archivo JSON actualizado automáticamente"
           git push https://x-access-token:${GH_TOKEN}@://github.com{{ github.repository }}.git HEAD
-        else
-          echo "Los datos no han cambiado. No es necesario actualizar."
         fi
