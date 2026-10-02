@@ -2,17 +2,19 @@ name: Actualizar Datos de la Estación
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # Hace que corra solo cada 15 minutos
-  workflow_dispatch: # Activa un botón para que puedas probarlo tú mismo cuando quieras
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Otorga permiso a la máquina virtual para guardar el archivo resultante
+      contents: write # Asegura el permiso de escritura a nivel de tarea
     steps:
     - name: 1. Descargar archivos del repositorio
       uses: actions/checkout@v4
+      with:
+        persist-credentials: true # Forzar a Git a recordar las credenciales seguras
 
     - name: 2. Arrancar Python
       uses: actions/setup-python@v5
@@ -30,5 +32,6 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@://github.com"
         git add dashboard.html
-        git diff-index --quiet HEAD || git commit -m "Meteo: Datos actualizados automáticamente"
+        # Hace el commit solo si el archivo ha cambiado físicamente
+        git diff-index --quiet HEAD || git commit -m "Meteo: Dashboard actualizado automáticamente"
         git push origin main
