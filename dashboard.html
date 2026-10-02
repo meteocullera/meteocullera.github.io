@@ -131,7 +131,7 @@
         const iM = i => i ? (parseFloat(i) * 25.4).toFixed(1) + " mm" : "0.0 mm";
         const txt = (id, t) => { const el = document.getElementById(id); if(el) el.innerText = t || "--"; };
 
-        fetch('https://github.io' + Date.now())
+        fetch('https://meteocullera.github.io/estacion.json' + Date.now())
             .then(res => res.json())
             .then(data => {
                 const d = data.davis_current_observation || {};
