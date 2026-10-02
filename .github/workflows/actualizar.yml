@@ -1,0 +1,34 @@
+name: Actualizar Datos de la Estación
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # Hace que corra solo cada 15 minutos
+  workflow_dispatch: # Activa un botón para que puedas probarlo tú mismo cuando quieras
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Otorga permiso a la máquina virtual para guardar el archivo resultante
+    steps:
+    - name: 1. Descargar archivos del repositorio
+      uses: actions/checkout@v4
+
+    - name: 2. Arrancar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: 3. Instalar conector HTTP
+      run: pip install requests
+
+    - name: 4. Ejecutar el procesador meteorológico
+      run: python script.py
+
+    - name: 5. Publicar los cambios en GitHub
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@://github.com"
+        git add index.html
+        git diff-index --quiet HEAD || git commit -m "Meteo: Datos actualizados automáticamente"
+        git push origin main
