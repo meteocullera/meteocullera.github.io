@@ -1,13 +1,10 @@
-yaml
 name: Actualizar Clima Automático
 
 on:
   schedule:
-    # Se ejecuta automáticamente cada 15 minutos
     - cron: '*/15 * * * *'
-  workflow_dispatch: # Activa el botón manual
+  workflow_dispatch:
 
-# Permisos necesarios para guardar y actualizar el archivo clima.json en tu web
 permissions:
   contents: write
 
@@ -31,7 +28,6 @@ jobs:
         WEATHERLINK_API_KEY: ${{ secrets.WEATHERLINK_API_KEY }}
         WEATHERLINK_API_SECRET: ${{ secrets.WEATHERLINK_API_SECRET }}
         WEATHERLINK_STATION_ID: ${{ secrets.WEATHERLINK_STATION_ID }}
-      # Corregido: Ahora apunta al nombre real con puntos
       run: python actualizar.clima.py
 
     - name: Guardar los cambios en el repositorio
