@@ -1,3 +1,4 @@
+
 name: Guardar Datos de la Estación
 
 on:
@@ -6,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -16,23 +17,10 @@ jobs:
 
     - name: 2. Descargar el JSON directo de WeatherLink
       run: |
-        curl -s "https://weatherlink.com" -o estacion.json
+        curl -s "https://api.weatherlink.com/v1/NoaaExt.json?user=001D0AE0D724&pass=semiuncial4&apiToken=BB6FD1E154A74270A0A613E9C2CFAAEE" -o estacion.json
 
-    - name: 3. Subir el JSON de forma segura al repositorio
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@://github.com"
-        
-        git pull origin HEAD
-        git add estacion.json
-        
-        # CORRECCIÓN: Si no hay cambios, el script muestra un mensaje informativo y finaliza con éxito (exit 0) en vez de fallar
-        if git diff-index --quiet HEAD; then
-          echo "Los datos meteorológicos no han cambiado. Finalizando con éxito."
-          exit 0
-        else
-          git commit -m "Meteo: Archivo JSON actualizado automáticamente"
-          git push https://x-access-token:${GH_TOKEN}@://github.com{{ github.repository }}.git HEAD
-        fi
+    - name: 3. Publicar JSON de forma automática y rápida
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: . # Sube los archivos de la raíz
+        branch: main # Fuerza la subida directa a tu rama principal sin bucles de Git
