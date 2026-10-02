@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeteoCullera Dashboard Simplificado</title>
+    <title>MeteoCullera Dashboard Completo</title>
     <style>
-        /* Mapeo directo de la paleta y fuentes de tu web principal */
         :root {
             --card: rgba(255, 255, 255, 0.94);
             --text: #1f2937;
             --muted: #4b5563;
             --brand: #2563eb;
             --border: rgba(31, 41, 55, .14);
+            --bg-sub: rgba(243, 244, 246, 0.7);
+            --high: #dc2626;
+            --low: #2563eb;
         }
         body {
             margin: 0;
@@ -19,7 +21,7 @@
             font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
             color: var(--text);
             background: transparent;
-            overflow: hidden;
+            overflow-x: hidden;
         }
         .dashboard-container {
             width: 100%;
@@ -54,24 +56,43 @@
             border-collapse: collapse;
         }
         .data-row {
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .data-row:last-child {
-            border-bottom: none;
+            border-top: 1px solid #e5e7eb;
         }
         td {
-            padding: 10px 12px;
+            padding: 8px 12px;
             font-size: 13.5px;
         }
         td.label {
             color: var(--muted);
-            font-weight: 500;
+            font-weight: 600;
         }
         td.val {
             font-weight: 700;
             text-align: right;
             color: #111827;
         }
+        .historical-grid {
+            background: var(--bg-sub);
+            padding: 6px 12px;
+            font-size: 11px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .hist-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        .time-tag {
+            font-size: 9.5px;
+            color: #6b7280;
+            margin-left: 2px;
+        }
+        .t-high { color: var(--high); font-weight: 600; }
+        .t-low { color: var(--low); font-weight: 600; }
+        .sub-text { font-size: 11px; color: #6b7280; font-weight: normal; }
     </style>
 </head>
 <body>
@@ -83,26 +104,111 @@
         </div>
 
         <table class="data-table">
+            <!-- TEMPERATURA -->
             <tr class="data-row"><td class="label">Temperatura</td><td class="val" id="v-temp" style="color: var(--brand); font-size: 14.5px;">--</td></tr>
+            <tr><td colspan="2" style="padding:0;">
+                <div class="historical-grid">
+                    <div class="hist-item"><span>Hoy Máx: <span class="t-high" id="t-dh">--</span><span class="time-tag" id="t-dht"></span></span><span>Mín: <span class="t-low" id="t-dl">--</span><span class="time-tag" id="t-dlt"></span></span></div>
+                    <div class="hist-item"><span>Mes Máx: <span class="t-high" id="t-mh">--</span></span><span>Mín: <span class="t-low" id="t-ml">--</span></span></div>
+                    <div class="hist-item"><span>Año Máx: <span class="t-high" id="t-yh">--</span></span><span>Mín: <span class="t-low" id="t-yl">--</span></span></div>
+                </div>
+            </td></tr>
+
+            <!-- HUMEDAD -->
             <tr class="data-row"><td class="label">Humedad Relativa</td><td class="val" id="v-hum">--</td></tr>
+            <tr><td colspan="2" style="padding:0;">
+                <div class="historical-grid">
+                    <div class="hist-item"><span>Hoy Máx: <span id="h-dh">--</span><span class="time-tag" id="h-dht"></span></span><span>Mín: <span id="h-dl">--</span><span class="time-tag" id="h-dlt"></span></span></div>
+                    <div class="hist-item"><span>Mes Máx: <span id="h-mh">--</span></span><span>Mín: <span id="h-ml">--</span></span></div>
+                    <div class="hist-item"><span>Año Máx: <span id="h-yh">--</span></span><span>Mín: <span id="h-yl">--</span></span></div>
+                </div>
+            </td></tr>
+
+            <!-- PRESIÓN -->
             <tr class="data-row"><td class="label">Presión Atmosférica</td><td class="val" id="v-pres">--</td></tr>
+            <tr><td colspan="2" style="padding:0;">
+                <div class="historical-grid">
+                    <div class="hist-item"><span>Hoy Máx: <span id="p-dh">--</span></span><span>Mín: <span id="p-dl">--</span></span></div>
+                    <div class="hist-item"><span>Mes Máx: <span id="p-mh">--</span></span><span>Mín: <span id="p-ml">--</span></span></div>
+                    <div class="hist-item"><span>Año Máx: <span id="p-yh">--</span></span><span>Mín: <span id="p-yl">--</span></span></div>
+                </div>
+            </td></tr>
+             <!-- PUNTO DE ROCÍO -->
             <tr class="data-row"><td class="label">Punto de Rocío</td><td class="val" id="v-dew">--</td></tr>
+            <tr><td colspan="2" style="padding:0;">
+                <div class="historical-grid">
+                    <div class="hist-item"><span>Hoy Máx: <span id="d-dh">--</span></span><span>Mín: <span id="d-dl">--</span></span></div>
+                    <div class="hist-item"><span>Mes Máx: <span id="d-mh">--</span></span><span>Mín: <span id="d-ml">--</span></span></div>
+                    <div class="hist-item"><span>Año Máx: <span id="d-yh">--</span></span><span>Mín: <span id="d-yl">--</span></span></div>
+                </div>
+            </td></tr>
+
+            <!-- ÍNDICE DE CALOR -->
             <tr class="data-row"><td class="label">Índice de Calor</td><td class="val" id="v-heat">--</td></tr>
-            <tr class="data-row"><td class="label">Viento (Vel. y Dir.)</td><td class="val" id="v-wind">--</td></tr>
-            <tr class="data-row"><td class="label">Precipitación Hoy</td><td class="val" id="v-rain">--</td></tr>
+            <tr><td colspan="2" style="padding:0;">
+                <div class="historical-grid">
+                    <div class="hist-item"><span>Hoy Máx: <span class="t-high" id="hi-dh">--</span></span><span>Mes Máx: <span class="t-high" id="hi-mh">--</span></span><span>Año Máx: <span class="t-high" id="hi-yh">--</span></span></div>
+                </div>
+            </td></tr>
+
+            <!-- VIENTO -->
+            <tr class="data-row"><td class="label">Viento (Vel. y Racha)</td><td class="val" id="v-wind">--</td></tr>
+            <tr><td colspan="2" style="padding:0;">
+                <div class="historical-grid">
+                    <div class="hist-item"><span>Hoy Racha Máx: <strong id="w-dh">--</strong><span class="time-tag" id="w-dht"></span></span></div>
+                    <div class="hist-item"><span>Mes Racha Máx: <strong id="w-mh">--</strong></span></div>
+                    <div class="hist-item"><span>Año Racha Máx: <strong id="w-yh">--</strong></span></div>
+                </div>
+            </td></tr>
+
+            <!-- PRECIPITACIÓN -->
+            <tr class="data-row"><td class="label">Precipitación</td><td class="val" id="v-rain">--</td></tr>
+            <tr><td colspan="2" style="padding:0;">
+                <div class="historical-grid">
+                    <div class="hist-item"><span>Hoy: <strong id="r-day">--</strong></span><span>Mes: <strong id="r-mon">--</strong></span><span>Año: <strong id="r-year">--</strong></span></div>
+                    <div class="hist-item"><span>Intensidad Máx Hoy: <span id="r-ratemax">--</span><span class="time-tag" id="r-ratetime"></span></span></div>
+                </div>
+            </td></tr>
+
+            <!-- RADIACIÓN SOLAR -->
             <tr class="data-row"><td class="label">Radiación Solar</td><td class="val" id="v-solar">--</td></tr>
+            <tr><td colspan="2" style="padding:0;">
+                <div class="historical-grid">
+                    <div class="hist-item"><span>Hoy Máx: <span id="s-dh">--</span><span class="time-tag" id="s-dht"></span></span></div>
+                    <div class="hist-item"><span>Mes Máx: <span id="s-mh">--</span></span><span>Año Máx: <span id="s-yh">--</span></span></div>
+                </div>
+            </td></tr>
+
+            <!-- ÍNDICE UV -->
             <tr class="data-row"><td class="label">Índice UV</td><td class="val" id="v-uv">--</td></tr>
+            <tr><td colspan="2" style="padding:0;">
+                <div class="historical-grid">
+                    <div class="hist-item"><span>Hoy Máx: <span id="u-dh">--</span><span class="time-tag" id="u-dht"></span></span></div>
+                    <div class="hist-item"><span>Mes Máx: <span id="u-mh">--</span></span><span>Año Máx: <span id="u-yh">--</span></span></div>
+                </div>
+            </td></tr>
         </table>
     </div>
 
     <script>
-        // Funciones de conversión a sistema métrico europeo
-        const mphToKmh = m => m ? (parseFloat(m) * 1.60934).toFixed(1) + " km/h" : "0.0 km/h";
-        const inToMm = i => i ? (parseFloat(i) * 25.4).toFixed(1) + " mm" : "0.0 mm";
+        const direcViento = {
+            "North": "N", "North-northeast": "NNE", "Northeast": "NE", "East-northeast": "ENE",
+            "East": "E", "East-southeast": "ESE", "Southeast": "SE", "South-southeast": "SSE",
+            "South": "S", "South-southwest": "SSW", "Southwest": "SW", "West-southwest": "WSW",
+            "West": "W", "West-northwest": "WNW", "Northwest": "NW", "North-northwest": "NNW",
+            "N": "N", "NNE": "NNE", "NE": "NE", "ENE": "ENE", "E": "E", "ESE": "ESE", "SE": "SE", 
+            "SSE": "SSE", "S": "S", "SSW": "SSW", "SW": "SW", "WSW": "WSW", "W": "W", "WNW": "WNW", 
+            "NW": "NW", "NNW": "NNW"
+        };
+
+        const fC = f => f ? ((parseFloat(f) - 32) * 5 / 9).toFixed(1) + " °C" : "--";
+        const mK = m => m ? (parseFloat(m) * 1.60934).toFixed(1) + " km/h" : "0.0 km/h";
+        const inMm = i => i ? (parseFloat(i) * 25.4).toFixed(1) + " mm" : "0.0 mm";
+        const inMmHr = i => i ? (parseFloat(i) * 25.4).toFixed(1) + " mm/h" : "0.0 mm/h";
+        const abrDir = d => direcViento[d] || d || "";
         const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
 
-        // fetch llama al archivo local que guarda tu Github Action (rompiendo caché con Date.now)
-        fetch('estacion.json?v=' + Date.now())
+        fetch('https://github.io' + Date.now())
             .then(res => res.json())
             .then(data => {
                 const davis = data.davis_current_observation || {};
@@ -110,26 +216,53 @@
                 setTxt('st-name', "📍 " + (davis.station_name || "Cullera-Sant Antoni"));
                 setTxt('st-time', data.observation_time || "--");
                 
-                // Mapear variables directas en el formato solicitado
                 setTxt('v-temp', data.temp_c + " °C");
+                setTxt('t-dh', fC(davis.temp_day_high_f)); setTxt('t-dht', davis.temp_day_high_time);
+                setTxt('t-dl', fC(davis.temp_day_low_f)); setTxt('t-dlt', davis.temp_day_low_time);
+                setTxt('t-mh', fC(davis.temp_month_high_f)); setTxt('t-ml', fC(davis.temp_month_low_f));
+                setTxt('t-yh', fC(davis.temp_year_high_f)); setTxt('t-yl', fC(davis.temp_year_low_f));
+                
                 setTxt('v-hum', data.relative_humidity + "%");
+                setTxt('h-dh', davis.relative_humidity_day_high + "%"); setTxt('h-dht', davis.relative_humidity_day_high_time);
+                setTxt('h-dl', davis.relative_humidity_day_low + "%"); setTxt('h-dlt', davis.relative_humidity_day_low_time);
+                setTxt('h-mh', davis.relative_humidity_month_high + "%"); setTxt('h-ml', davis.relative_humidity_month_low + "%");
+                setTxt('h-yh', davis.relative_humidity_year_high + "%"); setTxt('h-yl', davis.relative_humidity_year_low + "%");
+                
                 setTxt('v-pres', data.pressure_mb + " hPa");
+                setTxt('p-dh', davis.pressure_day_high_in + " inHg"); setTxt('p-dl', davis.pressure_day_low_in + " inHg");
+                setTxt('p-mh', davis.pressure_month_high_in + " inHg"); setTxt('p-ml', davis.pressure_month_low_in + " inHg");
+                setTxt('p-yh', davis.pressure_year_high_in + " inHg"); setTxt('p-yl', davis.pressure_year_low_in + " inHg");
+                
                 setTxt('v-dew', data.dewpoint_c + " °C");
+                setTxt('d-dh', fC(davis.dewpoint_day_high_f)); setTxt('d-dl', fC(davis.dewpoint_day_low_f));
+                setTxt('d-mh', fC(davis.dewpoint_month_high_f)); setTxt('d-ml', fC(davis.dewpoint_month_low_f));
+                setTxt('d-yh', fC(davis.dewpoint_year_high_f)); setTxt('d-yl', fC(davis.dewpoint_year_low_f));
+                
                 setTxt('v-heat', data.heat_index_c + " °C");
+                setTxt('hi-dh', fC(davis.heat_index_day_high_f)); setTxt('hi-mh', fC(davis.heat_index_month_high_f)); setTxt('hi-yh', fC(davis.heat_index_year_high_f));
                 
-                // Viento combinado (Velocidad + Dirección)
-                const vWind = mphToKmh(data.wind_mph);
-                const dWind = data.wind_dir || "";
-                setTxt('v-wind', `${vWind} ${dWind}`);
+                const vWind = mK(data.wind_mph);
+                const rWind = mK(davis.wind_ten_min_gust_mph);
+                const dWind = abrDir(data.wind_dir);
+                setTxt('v-wind', `${vWind} ${dWind} (Racha: ${rWind})`);
+                setTxt('w-dh', mK(davis.wind_day_high_mph)); setTxt('w-dht', davis.wind_day_high_time);
+                setTxt('w-mh', mK(davis.wind_month_high_mph)); setTxt('w-yh', mK(davis.wind_year_high_mph));
                 
-                // Lluvia hoy, radiación e índice UV
-                setTxt('v-rain', inToMm(davis.rain_day_in));
+                setTxt('v-rain', inMm(davis.rain_day_in));
+                setTxt('r-day', inMm(davis.rain_day_in)); setTxt('r-mon', inMm(davis.rain_month_in)); setTxt('r-year', inMm(davis.rain_year_in));
+                setTxt('r-ratemax', inMmHr(davis.rain_rate_day_high_in_per_hr)); setTxt('r-ratetime', davis.rain_rate_day_high_time);
+                
                 setTxt('v-solar', davis.solar_radiation + " W/m²");
+                setTxt('s-dh', d.solar_radiation_day_high + " W/m²"); setTxt('s-dht', davis.solar_radiation_day_high_time);
+                setTxt('s-mh', davis.solar_radiation_month_high + " W/m²"); setTxt('s-yh', davis.solar_radiation_year_high + " W/m²");
+                
                 setTxt('v-uv', davis.uv_index);
+                setTxt('u-dh', davis.uv_index_day_high); setTxt('u-dht', davis.uv_index_day_high_time);
+                setTxt('u-mh', davis.uv_index_month_high); setTxt('u-yh', davis.uv_index_year_high);
             })
             .catch(err => {
-                console.error("Error al procesar el JSON local:", err);
-                setTxt('st-time', "Error de sincronización local");
+                console.error("Error cargando variables:", err);
+                setTxt('st-time', "Error de sincronización");
             });
     </script>
 </body>
