@@ -1,12 +1,13 @@
+yaml
 name: Actualizar Clima Automático
 
 on:
   schedule:
-    # Esto le dice a GitHub que despierte cada 15 minutos
+    # Se ejecuta automáticamente cada 15 minutos
     - cron: '*/15 * * * *'
-  workflow_dispatch: # Permite probar el botón a mano cuando quieras
+  workflow_dispatch: # Activa el botón manual
 
-# 1. PERMISOS OBLIGATORIOS: Permite escribir el nuevo clima.json en tu repositorio
+# Permisos necesarios para guardar y actualizar el archivo clima.json en tu web
 permissions:
   contents: write
 
@@ -30,10 +31,9 @@ jobs:
         WEATHERLINK_API_KEY: ${{ secrets.WEATHERLINK_API_KEY }}
         WEATHERLINK_API_SECRET: ${{ secrets.WEATHERLINK_API_SECRET }}
         WEATHERLINK_STATION_ID: ${{ secrets.WEATHERLINK_STATION_ID }}
-      # Nota: Si tu archivo está dentro de una carpeta (ej: scripts), recuerda poner 'python scripts/actualizar_clima.py'
-      run: python actualizar_clima.py
+      # Corregido: Ahora apunta al nombre real con puntos
+      run: python actualizar.clima.py
 
-    # 2. SOLUCIÓN AL ERROR 127: Usamos una extensión oficial automatizada para hacer el Push sin fallos
     - name: Guardar los cambios en el repositorio
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
