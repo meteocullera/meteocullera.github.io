@@ -2,36 +2,47 @@ name: Actualizar Datos de la Estación
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
-  workflow_dispatch:
+    - cron: '*/15 * * * *' # Se ejecuta cada 15 minutos automáticamente
+  workflow_dispatch: # Permite ejecución manual con el botón
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Asegura el permiso de escritura a nivel de tarea
+      contents: write # Permiso explícito de escritura para el token interno
     steps:
-    - name: 1. Descargar archivos del repositorio
+    - name: 1. Clonar el repositorio
       uses: actions/checkout@v4
       with:
-        persist-credentials: true # Forzar a Git a recordar las credenciales seguras
+        fetch-depth: 0
 
-    - name: 2. Arrancar Python
+    - name: 2. Configurar Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.x'
 
-    - name: 3. Instalar conector HTTP
+    - name: 3. Instalar librería de peticiones
       run: pip install requests
 
-    - name: 4. Ejecutar el procesador meteorológico
+    - name: 4. Ejecutar el script meteorológico
       run: python script.py
 
-    - name: 5. Publicar los cambios en GitHub
+    - name: 5. Subir cambios con autenticación reforzada
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@://github.com"
+        
+        # Sincronizar cambios por si acaso
+        git pull origin HEAD
+        
         git add dashboard.html
-        # Hace el commit solo si el archivo ha cambiado físicamente
-        git diff-index --quiet HEAD || git commit -m "Meteo: Dashboard actualizado automáticamente"
-        git push origin main
+        
+        if ! git diff-index --quiet HEAD; then
+          git commit -m "Meteo: Dashboard actualizado automáticamente"
+          # Autentica el push usando el token dinámico de la tarea para evitar el error 128
+          git push https://x-access-token:${GH_TOKEN}@://github.com{{ github.repository }}.git HEAD
+        else
+          echo "Sin cambios detectados en los datos. No se requiere actualización."
+        fi
