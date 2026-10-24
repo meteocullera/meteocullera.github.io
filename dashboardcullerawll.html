@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Meteorológico - Cullera</title>
-   <style>
+ <style>
+        /* Estilos base del Dashboard sin dependencias externas */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #0f172a;
@@ -20,7 +21,7 @@
         
         .container {
             width: 100%;
-            max-width: 1024px;
+            max-width: 1200px;
             background-color: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(12px);
             border-radius: 16px;
@@ -48,33 +49,45 @@
         .update-box { font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
         .update-time { font-size: 16px; color: #e2e8f0; font-weight: 700; margin: 4px 0 0 0; }
 
-        /* Cuadrícula única y uniforme */
-        .grid-4 { display: grid; grid-template-cols: repeat(2, 1fr); gap: 16px; }
-        @media (min-width: 640px) { .grid-4 { grid-template-cols: repeat(3, 1fr); } }
-        @media (min-width: 768px) { .grid-4 { grid-template-cols: repeat(4, 1fr); } }
+        /* Cuadrícula unificada de 3 columnas para tarjetas grandes */
+        .grid-3 { display: grid; grid-template-cols: 1fr; gap: 20px; }
+        @media (min-width: 640px) { .grid-3 { grid-template-cols: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .grid-3 { grid-template-cols: repeat(3, 1fr); } }
         
-        /* Tarjeta base simétrica para absolutamente todas las métricas */
-        .card-sub { 
-            background-color: rgba(30, 41, 59, 0.8); 
-            padding: 20px; 
-            border-radius: 12px; 
-            border: 1px solid rgba(71, 85, 105, 0.5); 
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .sub-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; margin: 0 0 6px 0; }
-        .sub-value { font-size: 22px; font-weight: 700; color: #ffffff; margin: 0; }
-        .badge { font-size: 12px; font-weight: 700; background-color: rgba(59,130,246,0.2); color: #93c5fd; border-radius: 4px; font-family: monospace; padding: 2px 6px; margin-left: 4px; vertical-align: middle; }
+        /* Estilo base de tarjeta Premium con el esqueleto original */
+        .card-main { border-radius: 12px; padding: 24px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: space-between; min-height: 120px; box-sizing: border-box; }
+        
+        /* Subetiquetas por categorías */
+        .card-label { font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .label-temp { color: #fde047; } 
+        .label-hum { color: #f472b6; }
+        .label-wind { color: #93c5fd; } 
+        .label-bar { color: #6ee7b7; }
+        .label-sun { color: #fbbf24; }
+        .label-rain { color: #38bdf8; }
+        .label-et { color: #a78bfa; }
+        
+        /* Tipografías gigantes igualadas en todos los módulos */
+        .value-large { font-size: 38px; font-weight: 700; color: #ffffff; letter-spacing: -1px; margin-top: 16px; display: block; }
+        .unit { font-size: 20px; font-weight: 500; }
+        .badge { font-size: 14px; font-weight: 700; background-color: rgba(59,130,246,0.3); color: #93c5fd; border-radius: 4px; font-family: monospace; margin-left: 8px; padding: 4px 8px; vertical-align: middle; }
+
+        /* Paletas cromáticas dinámicas con degradados */
+        .card-temp, .card-dew, .card-chill, .card-heat { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(234,88,12,0.1)); border-color: rgba(245,158,11,0.2); }
+        .card-hum { background: linear-gradient(135deg, rgba(236,72,153,0.1), rgba(219,39,119,0.1)); border-color: rgba(236,72,153,0.2); }
+        .card-wind, .card-wind-avg { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(79,70,229,0.1)); border-color: rgba(59,130,246,0.2); }
+        .card-bar { background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(13,148,136,0.1)); border-color: rgba(16,185,129,0.2); }
+        .card-sun, .card-uv { background: linear-gradient(135deg, rgba(217,119,6,0.1), rgba(251,191,36,0.1)); border-color: rgba(217,119,6,0.2); }
+        .card-rain, .card-rain-rate, .card-rain-storm, .card-rain-totals { background: linear-gradient(135deg, rgba(14,165,233,0.1), rgba(2,132,199,0.1)); border-color: rgba(14,165,233,0.2); }
+        .card-et, .card-et-totals { background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(109,40,217,0.1)); border-color: rgba(139,92,246,0.2); }
     </style>
-   
+    
    
 </head>
 <body>
 <div class="container">
     
-    <!-- Cabecera del Dashboard -->
+    <!-- Cabecera del Dashboard Premium -->
     <div class="header">
         <div>
             <h1 class="title"><span class="indicator"></span>CULLERA - SANT ANTONI</h1>
@@ -86,114 +99,116 @@
         </div>
     </div>
 
-    <!-- CUADRÍCULA UNIFORME DE TARJETAS (TODAS IGUALES) -->
-    <div class="grid-4">
+    <!-- CUADRÍCULA DE TARJETAS DE ALTO IMPACTO (TODAS IGUALES) -->
+    <div class="grid-3">
         <!-- Temperatura -->
-        <div class="card-sub">
-            <p class="sub-label">Temperatura</p>
-            <p class="sub-value"><span id="curr-temp">--.-</span> °C</p>
+        <div class="card-main card-temp">
+            <span class="card-label label-temp">Temperatura</span>
+            <span class="value-large"><span id="curr-temp">--.-</span><span class="unit"> °C</span></span>
         </div>
 
         <!-- Humedad -->
-        <div class="card-sub">
-            <p class="sub-label">Humedad</p>
-            <p class="sub-value"><span id="curr-hum">--</span>%</p>
+        <div class="card-main card-hum">
+            <span class="card-label label-hum">Humedad Exterior</span>
+            <span class="value-large"><span id="curr-hum">--</span><span class="unit"> %</span></span>
         </div>
 
         <!-- Viento Dirección -->
-        <div class="card-sub">
-            <p class="sub-label">Viento (Dirección)</p>
-            <p class="sub-value"><span id="curr-wind-deg">--</span>° <span id="curr-wind-dir" class="badge">--</span></p>
+        <div class="card-main card-wind">
+            <span class="card-label label-wind">Viento (Dirección)</span>
+            <span class="value-large"><span id="curr-wind-deg">--</span><span class="unit">°</span><span id="curr-wind-dir" class="badge">--</span></span>
         </div>
 
         <!-- Viento Velocidad Media -->
-        <div class="card-sub">
-            <p class="sub-label">Viento (Media 10 min)</p>
-            <p class="sub-value"><span id="curr-wind-avg">--.-</span> km/h</p>
+        <div class="card-main card-wind-avg">
+            <span class="card-label label-wind">Viento (Media 10 min)</span>
+            <span class="value-large"><span id="curr-wind-avg">--.-</span><span class="unit"> km/h</span></span>
         </div>
 
         <!-- Presión Atmosférica -->
-        <div class="card-sub">
-            <p class="sub-label">Presión Atmosférica</p>
-            <p class="sub-value"><span id="curr-bar">----.-</span> hPa</p>
+        <div class="card-main card-bar">
+            <span class="card-label label-bar">Presión Atmosférica</span>
+            <span class="value-large"><span id="curr-bar">----.-</span><span class="unit"> hPa</span></span>
         </div>
 
         <!-- Punto de Rocío -->
-        <div class="card-sub">
-            <p class="sub-label">Punto de Rocío</p>
-            <p class="sub-value"><span id="curr-dew">--.-</span> °C</p>
+        <div class="card-main card-dew">
+            <span class="card-label label-temp">Punto de Rocío</span>
+            <span class="value-large"><span id="curr-dew">--.-</span><span class="unit"> °C</span></span>
         </div>
 
         <!-- Sensación Térmica -->
-        <div class="card-sub">
-            <p class="sub-label">Sensación Térmica</p>
-            <p class="sub-value"><span id="curr-chill">--.-</span> °C</p>
+        <div class="card-main card-chill">
+            <span class="card-label label-temp">Sensación Térmica</span>
+            <span class="value-large"><span id="curr-chill">--.-</span><span class="unit"> °C</span></span>
         </div>
 
         <!-- Índice de Calor -->
-        <div class="card-sub">
-            <p class="sub-label">Índice de Calor</p>
-            <p class="sub-value"><span id="curr-heat">--.-</span> °C</p>
+        <div class="card-main card-heat">
+            <span class="card-label label-temp">Índice de Calor</span>
+            <span class="value-large"><span id="curr-heat">--.-</span><span class="unit"> °C</span></span>
         </div>
 
         <!-- Radiación Solar -->
-        <div class="card-sub">
-            <p class="sub-label">Radiación Solar</p>
-            <p class="sub-value"><span id="curr-sun">--</span> W/m²</p>
+        <div class="card-main card-sun">
+            <span class="card-label label-sun">Radiación Solar</span>
+            <span class="value-large"><span id="curr-sun">--</span><span class="unit"> W/m²</span></span>
         </div>
 
         <!-- UV -->
-        <div class="card-sub">
-            <p class="sub-label">Índice UV</p>
-            <p class="sub-value"><span id="curr-uvi">--.-</span></p>
+        <div class="card-main card-uv">
+            <span class="card-label label-sun">Índice UV</span>
+            <span class="value-large"><span id="curr-uvi">--.-</span></span>
         </div>
 
         <!-- Lluvia Hoy -->
-        <div class="card-sub">
-            <p class="sub-label">Lluvia Hoy</p>
-            <p class="sub-value"><span id="curr-prec">--.-</span> mm</p>
+        <div class="card-main card-rain">
+            <span class="card-label label-rain">Lluvia Hoy</span>
+            <span class="value-large"><span id="curr-prec">--.-</span><span class="unit"> mm</span></span>
         </div>
 
         <!-- Intensidad Actual -->
-        <div class="card-sub">
-            <p class="sub-label">Intensidad Actual</p>
-            <p class="sub-value"><span id="curr-rain-rate">--.-</span> mm/h</p>
+        <div class="card-main card-rain-rate">
+            <span class="card-label label-rain">Intensidad Actual</span>
+            <span class="value-large"><span id="curr-rain-rate">--.-</span><span class="unit"> mm/h</span></span>
         </div>
 
         <!-- Episodio Lluvia -->
-        <div class="card-sub">
-            <p class="sub-label">Lluvia Episodio</p>
-            <p class="sub-value"><span id="curr-rain-storm">--.-</span> mm</p>
+        <div class="card-main card-rain-storm">
+            <span class="card-label label-rain">Lluvia Episodio</span>
+            <span class="value-large"><span id="curr-rain-storm">--.-</span><span class="unit"> mm</span></span>
         </div>
 
-        <!-- Lluvia Mensual y Anual (Comparten tarjeta) -->
-        <div class="card-sub">
-            <p class="sub-label">Lluvia Mes / Año</p>
-            <p class="sub-value" style="font-size: 18px; margin-top: 6px;"><span id="curr-rain-month">--.-</span> / <span id="curr-rain-year">--.-</span> <span class="unit" style="font-size: 14px;">mm</span></p>
+        <!-- Lluvia Mensual y Anual -->
+        <div class="card-main card-rain-totals">
+            <span class="card-label label-rain">Lluvia Mes / Año</span>
+            <span class="value-large" style="font-size: 32px;"><span id="curr-rain-month">--.-</span> / <span id="curr-rain-year">--.-</span><span class="unit" style="font-size: 16px;"> mm</span></span>
         </div>
 
         <!-- ET Diaria -->
-        <div class="card-sub">
-            <p class="sub-label">ET Diaria</p>
-            <p class="sub-value"><span id="curr-et-day">--.---</span> mm</p>
+        <div class="card-main card-et">
+            <span class="card-label label-et">ET Diaria</span>
+            <span class="value-large"><span id="curr-et-day">--.---</span><span class="unit"> mm</span></span>
         </div>
 
-        <!-- ET Mensual y Anual (Comparten tarjeta) -->
-        <div class="card-sub">
-            <p class="sub-label">ET Mes / Año</p>
-            <p class="sub-value" style="font-size: 18px; margin-top: 6px;"><span id="curr-et-month">--.---</span> / <span id="curr-et-year">--.---</span> <span class="unit" style="font-size: 14px;">mm</span></p>
+        <!-- ET Mensual y Anual -->
+        <div class="card-main card-et-totals">
+            <span class="card-label label-et">ET Mes / Año</span>
+            <span class="value-large" style="font-size: 32px;"><span id="curr-et-month">--.---</span> / <span id="curr-et-year">--.---</span><span class="unit" style="font-size: 16px;"> mm</span></span>
         </div>
     </div>
-</div> 
-<script>
+</div>
+
+ <script>
         const PROXY_URL = "https://meteotetuan.w5.lt/cullera/cullera_proxy.php";
 
-        // Funciones de conversión (Imperial -> Métrico)
+        // Funciones auxiliares de conversión (Sistema Imperial -> Sistema Métrico)
         const fToC = (f) => f !== null && f !== undefined ? ((f - 32) * 5 / 9).toFixed(1) : "--.-";
         const mphToKmh = (mph) => mph !== null && mph !== undefined ? (mph * 1.60934).toFixed(1) : "--.-";
         const inhgToHpa = (inhg) => inhg !== null && inhg !== undefined ? (inhg * 33.8639).toFixed(1) : "----.-";
         const inchesToMm = (inches, decimals = 1) => inches !== null && inches !== undefined ? (inches * 25.4).toFixed(decimals) : "--.-";
 
+        // Transforma los grados geográficos del viento en rumbo cardinal
         function obtenerCardinales(grados) {
             if (grados === null || grados === undefined) return "--";
             const direcciones = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"];
@@ -204,23 +219,25 @@
         async function fetchWeatherData() {
             try {
                 const response = await fetch(PROXY_URL);
-                if (!response.ok) throw new Error("Fallo de red");
+                if (!response.ok) throw new Error("Fallo de comunicación con el proxy");
                 
                 const data = await response.json();
                 
-                if (!data.sensors || data.sensors.length === 0 || !data.sensors.data || data.sensors.data.length === 0) {
-                    throw new Error("Estructura inválida");
+                // Corrección del mapeo del array de sensores en la API v2 de WeatherLink
+                if (!data.sensors || data.sensors.length === 0 || !data.sensors[0].data || data.sensors[0].data.length === 0) {
+                    throw new Error("Estructura de datos vacía o incorrecta");
                 }
                 
-                const weather = data.sensors.data;
+                // Acceso seguro al primer sensor e historial del Integrated Sensor Suite (ISS)
+                const weather = data.sensors[0].data[0];
 
-                // --- HORA DE ACTUALIZACIÓN (Formato Horas:Minutos sin segundos extraídos del ts del proxy) ---
+                // --- HORA DE ACTUALIZACIÓN (Formato Horas:Minutos sin segundos extraídos del timestamp) ---
                 const fechaActualizacion = new Date(weather.ts * 1000);
                 const horas = String(fechaActualizacion.getHours()).padStart(2, '0');
                 const minutos = String(fechaActualizacion.getMinutes()).padStart(2, '0');
                 document.getElementById('last-update').textContent = `${horas}:${minutos}`;
 
-                // --- MAPEO DE TARJETAS UNIFORMES ---
+                // --- INYECCIÓN DE VARIABLES SOBRE TARJETAS PREMIUM HIGHLIGHTS ---
                 document.getElementById('curr-temp').textContent = fToC(weather.temp_out);
                 document.getElementById('curr-hum').textContent = weather.hum_out !== null ? weather.hum_out : "--";
                 document.getElementById('curr-wind-deg').textContent = weather.wind_dir !== null ? weather.wind_dir : "--";
@@ -233,27 +250,30 @@
                 document.getElementById('curr-sun').textContent = weather.solar_rad !== null ? weather.solar_rad : "--";
                 document.getElementById('curr-uvi').textContent = weather.uv !== null ? weather.uv.toFixed(1) : "--.-";
                 
-                // Pluviometría
+                // Pluviometría (Campos de lluvia con terminación _mm calculados nativamente por WeatherLink)
                 document.getElementById('curr-prec').textContent = (weather.rain_day_mm || 0).toFixed(1);
                 document.getElementById('curr-rain-rate').textContent = (weather.rain_rate_mm || 0).toFixed(1);
                 document.getElementById('curr-rain-storm').textContent = (weather.rain_storm_mm || 0).toFixed(1);
                 document.getElementById('curr-rain-month').textContent = (weather.rain_month_mm || 0).toFixed(1);
                 document.getElementById('curr-rain-year').textContent = (weather.rain_year_mm || 0).toFixed(1);
                 
-                // Evapotranspiración
+                // Evapotranspiración (Conversión de pulgadas a mm de alta precisión decimal)
                 document.getElementById('curr-et-day').textContent = inchesToMm(weather.et_day, 3);
                 document.getElementById('curr-et-month').textContent = inchesToMm(weather.et_month, 3);
                 document.getElementById('curr-et-year').textContent = inchesToMm(weather.et_year, 3);
 
             } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('last-update').textContent = "ERROR";
+                console.error('Error cargando el dashboard con WeatherLink v2:', error);
+                document.getElementById('last-update').innerHTML = `<span style="color:#f87171; font-size:12px;">ERR</span>`;
             }
         }
 
+        // Ejecución inicial inmediata al cargar el documento
         fetchWeatherData();
+        
+        // Intervalo de actualización automatizado fijado a 1 minuto (60000ms)
         setInterval(fetchWeatherData, 60000);
     </script>
-
+    
 </body>
 </html>
