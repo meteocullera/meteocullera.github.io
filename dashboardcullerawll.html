@@ -194,8 +194,7 @@
         </div>
         
         </div>
-
-    <script>
+ <script>
         const PROXY_URL = "https://meteotetuan.w5.lt/cullera/cullera_proxy.php";
 
         // Funciones auxiliares de conversión (Sistema Imperial -> Sistema Métrico)
@@ -219,6 +218,14 @@
             return "═ Estable";
         }
 
+        // FUNCIÓN DE ALTURA: Mide el dashboard y envía el dato 'dashboardHeight' que espera la web principal
+        function notificarAlturaAWebPrincipal() {
+            const alturaReal = document.documentElement.scrollHeight || document.body.scrollHeight;
+            if (alturaReal) {
+                window.parent.postMessage({ dashboardHeight: alturaReal }, "*");
+            }
+        }
+
         async function fetchWeatherData() {
             try {
                 const response = await fetch(PROXY_URL);
@@ -227,12 +234,12 @@
                 const data = await response.json();
                 
                 // Validación del array de sensores de la API v2 de WeatherLink
-                if (!data.sensors || data.sensors.length === 0 || !data.sensors[0].data || data.sensors[0].data.length === 0) {
+                if (!data.sensors || data.sensors.length === 0 || !data.sensors.data || data.sensors.data.length === 0) {
                     throw new Error("Estructura de datos vacía o incorrecta");
                 }
                 
-                // Acceso seguro al primer sensor del Integrated Sensor Suite (ISS)
-                const weather = data.sensors[0].data[0];
+                // Acceso al primer bloque del sensor ISS (Integrated Sensor Suite)
+                const weather = data.sensors.data;
 
                 // --- HORA DE ACTUALIZACIÓN (Horas:Minutos) ---
                 const fechaActualizacion = new Date(weather.ts * 1000);
@@ -266,17 +273,24 @@
                 document.getElementById('curr-et-month').textContent = inchesToMm(weather.et_month, 3);
                 document.getElementById('curr-et-year').textContent = inchesToMm(weather.et_year, 3);
 
+                // Forzar el envío de la altura a la web principal tras inyectar todos los datos
+                setTimeout(notificarAlturaAWebPrincipal, 200);
+
             } catch (error) {
                 console.error('Error cargando el dashboard con WeatherLink v2:', error);
                 document.getElementById('last-update').innerHTML = `<span style="color:#f87171; font-size:12px;">ERR</span>`;
             }
         }
 
-        // Ejecución inicial inmediata al cargar el documento
+        // Ejecución inicial automática al cargar el documento
         fetchWeatherData();
         
         // Intervalo de actualización automatizado fijado a 1 minuto (60000ms)
         setInterval(fetchWeatherData, 60000);
+
+        // Forzar recálculo si el usuario cambia el tamaño o rota la pantalla del móvil
+        window.addEventListener("load", () => setTimeout(notificarAlturaAWebPrincipal, 350));
+        window.addEventListener("resize", notificarAlturaAWebPrincipal);
     </script>
 </body>
 </html>
