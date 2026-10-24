@@ -26,34 +26,16 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:va
     overflow: hidden;
     padding: 0;
 }
-/* Altura adaptativa por tramos (Infallible para evitar cortes) */
+/* Altura adaptativa fluida basada en la pantalla */
 .weatherlink-frame-container iframe {
     width: 100% !important;
     min-width: 100% !important;
+    height: 85vh !important; /* Ocupa el 85% del alto de cualquier pantalla (Móvil, Tablet o PC) */
+    min-height: 500px;       /* Evita que se encoja demasiado en móviles pequeños */
     border: none;
     display: block;
-    
-    /* 1. Altura para MÓVILES: Es muy alto porque las tarjetas se apilan una debajo de otra */
-    height: 980px !important; 
 }
-
-/* 2. Altura para TABLETS: Las tarjetas se agrupan en dos columnas */
-@media(min-width: 480px) {
-    .weatherlink-frame-container iframe {
-        height: 680px !important;
-    }
-}
-
-/* 3. Altura para ORDENADORES (PC): Todo se pone de lado y cabe en formato horizontal libre */
-@media(min-width: 768px) {
-    .weatherlink-frame-container iframe {
-        height: 480px !important; /* Aumentado para asegurar que los extremos diarios se vean enteros */
-    }
-}
-
-    
-
-}    
+  
 
 /* CORRECCIÓN PRINCIPAL: Expansión total adaptativa */
 .current-table{max-width:100%;margin:16px auto 20px;background:#fff;border:1px solid rgba(31,41,55,.14);border-radius:14px;box-shadow:0 10px 22px rgba(0,0,0,.10);overflow:hidden}
@@ -221,11 +203,10 @@ footer{background:#1f2937;color:#d1d5db;padding:26px 18px;margin-top:40px}
 <div class="logo">MeteoCullera</div>
 <img src="/images/encabezado.jpg" class="header-image" alt="Encabezado MeteoCullera"><br>
 <div class="update-time"><span class="live-dot"></span>Estación en tiempo real</div>
-
-<div class="weatherlink-frame-container">
-<iframe src="dashboardcullera.html" id="iframe-meteo" frameborder="0" scrolling="yes"></iframe>
     
-</div>
+<div class="weatherlink-frame-container">
+    <iframe src="dashboardcullera.html" id="iframe-meteo" allowtransparency="true"></iframe>
+</div>    
 
 <div class="history-link-wrap">
     <a class="history-link" href="https://www.weatherlink.com/embeddablePage/show/648319f5cc46401aa53deb0a11d94f9f/summary" target="_blank">Sumario completo de datos</a>
