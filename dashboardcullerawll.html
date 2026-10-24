@@ -109,8 +109,12 @@
                 <p class="station">RIBERA BAIXA, VALENCIA</p>
             </div>
             <div>
-                <span class="update-box">Última actualización</span>
-                <p id="last-update" class="update-time">--:--</p>
+                <div class="update-box">
+            Última actualización
+            <p id="last-update" class="update-time">--:--</p>
+            <p id="last-date" class="update-time" style="font-size: 12px; opacity: 0.8; margin-top: 2px;">--/--/----</p>
+        </div>
+
             </div>
         </div>
         
@@ -262,6 +266,11 @@
                 const horas = String(fechaActualizacion.getHours()).padStart(2, '0');
                 const minutos = String(fechaActualizacion.getMinutes()).padStart(2, '0');
                 document.getElementById('last-update').textContent = `${horas}:${minutos}`;
+                
+                const dia = String(fechaActualizacion.getDate()).padStart(2, '0');
+                const mes = String(fechaActualizacion.getMonth() + 1).padStart(2, '0');
+                const anio = fechaActualizacion.getFullYear();
+                document.getElementById('last-date').textContent = `${dia}/${mes}/${anio}`;
 
                 // --- INYECCIÓN DE VARIABLES EN TARJETAS PREMIUM ---
                 document.getElementById('curr-temp').textContent = fToC(weather.temp_out);
