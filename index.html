@@ -26,16 +26,32 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:va
     overflow: hidden;
     padding: 0;
 }
-/* Deja la regla del iframe así de simple en tu CSS principal */
+/* Altura adaptativa por tramos (Infallible para evitar cortes) */
 .weatherlink-frame-container iframe {
     width: 100% !important;
     min-width: 100% !important;
-    height: 800px; /* Altura inicial temporal hasta que el script tome el control */
     border: none;
     display: block;
-    transition: height 0.2s ease; /* Suaviza el cambio de tamaño */
+    
+    /* 1. Altura para MÓVILES: Es muy alto porque las tarjetas se apilan una debajo de otra */
+    height: 980px !important; 
 }
 
+/* 2. Altura para TABLETS: Las tarjetas se agrupan en dos columnas */
+@media(min-width: 480px) {
+    .weatherlink-frame-container iframe {
+        height: 680px !important;
+    }
+}
+
+/* 3. Altura para ORDENADORES (PC): Todo se pone de lado y cabe en formato horizontal libre */
+@media(min-width: 768px) {
+    .weatherlink-frame-container iframe {
+        height: 480px !important; /* Aumentado para asegurar que los extremos diarios se vean enteros */
+    }
+}
+
+    
 
 }    
 
