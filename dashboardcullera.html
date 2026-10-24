@@ -205,7 +205,6 @@
                 const data = await response.json();
                 
                 // Metadatos
-                document.getElementById('station-id').textContent = 'ID: ' + data.estacio;
                 document.getElementById('last-update').textContent = data.dades_act.DATA_HORA;
 
                 // Datos Actuales (dades_act)
