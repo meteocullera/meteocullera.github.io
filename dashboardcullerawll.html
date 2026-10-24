@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Meteorológico - Cullera</title>
+    <style>
+        /* Estilos base del Dashboard sin dependencias externas */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f1f5f9;
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (min-width: 768px) { body { padding: 32px; } }
+        
+        .container {
+            width: 100%;
+            max-width: 1024px;
+            background-color: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+        }
+        
+        .header {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.6);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            gap: 8px;
+        }
+        @media (min-width: 640px) {
+            .header { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+        
+        .title { font-size: 24px; font-weight: 700; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px; }
+        .indicator { width: 12px; height: 12px; background-color: #10b981; border-radius: 50%; display: inline-block; }
+        .station { font-family: monospace; font-size: 12px; color: #94a3b8; margin: 4px 0 0 0; }
+        .update-box { font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
+        .update-time { font-size: 14px; color: #e2e8f0; font-weight: 500; margin: 4px 0 0 0; }
+
+        /* Cuadrícula Principal */
+        .grid-3 { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
+        @media (min-width: 768px) { .grid-3 { grid-template-cols: repeat(3, 1fr); } }
+        
+        .card-main { border-radius: 12px; padding: 24px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: space-between; min-height: 120px; }
+        .card-temp { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(234,88,12,0.1)); border-color: rgba(245,158,11,0.2); }
+        .card-wind { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(79,70,229,0.1)); border-color: rgba(59,130,246,0.2); }
+        .card-bar { background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(13,148,136,0.1)); border-color: rgba(16,185,129,0.2); }
+        
+        .card-label { font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .label-temp { color: #fde047; } .label-wind { color: #93c5fd; } .label-bar { color: #6ee7b7; }
+        
+        .value-large { font-size: 40px; font-weight: 700; color: #ffffff; letter-spacing: -1px; margin-top: 16px; display: block; }
+        @media (min-width: 768px) { .value-large { font-size: 48px; } }
+        .unit { font-size: 20px; font-weight: 500; }
+        .badge { font-size: 12px; font-weight: 700; background-color: rgba(59,130,246,0.2); color: #93c5fd; border-radius: 4px; font-family: monospace; margin-left: 8px; padding: 2px 6px; }
+
+        /* Cuadrículas Secundarias */
+        .grid-4 { display: grid; grid-template-cols: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+        @media (min-width: 768px) { .grid-4 { grid-template-cols: repeat(4, 1fr); } }
+        .card-sub { background-color: rgba(30, 41, 59, 0.8); padding: 16px; border-radius: 12px; border: 1px solid rgba(71, 85, 105, 0.5); box-sizing: border-box; }
+        .sub-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; margin: 0; }
+        .sub-value { font-size: 20px; font-weight: 700; color: #ffffff; margin: 4px 0 0 0; }
+        
+        .section-subtitle { font-size: 14px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; margin: 24px 0 16px 0; border-left: 3px solid #3b82f6; padding-left: 8px; }
+    </style> 
+   
+   
+   
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Cabecera del Dashboard -->
+        <div class="header">
+            <div>
+                <h1 class="title"><span class="indicator"></span>Estación Meteorológica Cullera</h1>
+                <p id="station-id" class="station">Cargando estación...</p>
+            </div>
+            <div>
+                <span class="update-box">Última actualización</span>
+                <p id="last-update" class="update-time">--/--/---- --:--</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 1: DATOS ACTUALES PRINCIPALES -->
+        <div class="grid-3">
+            <div class="card-main card-temp">
+                <span class="card-label label-temp">Temperatura</span>
+                <span class="value-large"><span id="curr-temp">--.-</span><span class="unit"> °C</span></span>
+            </div>
+            <div class="card-main card-wind">
+                <span class="card-label label-wind">Viento</span>
+                <span class="value-large"><span id="curr-wind">--.-</span><span class="unit"> km/h</span><span id="curr-wind-dir" class="badge">--</span></span>
+            </div>
+            <div class="card-main card-bar">
+                <span class="card-label label-bar">Presión</span>
+                <span class="value-large"><span id="curr-bar">----.-</span><span class="unit"> hPa</span></span>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: CONDICIONES EN TIEMPO REAL -->
+        <div class="section-subtitle">Condiciones en Tiempo Real</div>
+        <div class="grid-4">
+            <div class="card-sub">
+                <p class="sub-label">Humedad</p>
+                <p class="sub-value"><span id="curr-hum">--</span>%</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Radiación Solar</p>
+                <p class="sub-value"><span id="curr-sun">--</span> W/m²</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Índice UV</p>
+                <p class="sub-value"><span id="curr-uvi">--.-</span></p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Dirección Viento</p>
+                <p class="sub-value"><span id="curr-wind-deg">--</span>°</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Viento Medio (10 min)</p>
+                <p class="sub-value"><span id="curr-wind-avg">--.-</span> km/h</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Racha Máx (10 min)</p>
+                <p class="sub-value"><span id="curr-wind-gust">--.-</span> km/h</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Tendencia Presión</p>
+                <p class="sub-value"><span id="curr-bar-trend">--</span></p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Punto de Rocío</p>
+                <p class="sub-value"><span id="curr-dew">--.-</span> °C</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Sensación Térmica</p>
+                <p class="sub-value"><span id="curr-chill">--.-</span> °C</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Índice de Calor</p>
+                <p class="sub-value"><span id="curr-heat">--.-</span> °C</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3: PLUVIOMETRÍA Y EVAPOTRANSPIRACIÓN -->
+        <div class="section-subtitle">Lluvia y Evapotranspiración (ET)</div>
+        <div class="grid-4">
+            <div class="card-sub">
+                <p class="sub-label">Lluvia Hoy</p>
+                <p class="sub-value"><span id="curr-prec">--.-</span> mm</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Intensidad Lluvia</p>
+                <p class="sub-value"><span id="curr-rain-rate">--.-</span> mm/h</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Lluvia Episodio</p>
+                <p class="sub-value"><span id="curr-rain-storm">--.-</span> mm</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Lluvia Mensual</p>
+                <p class="sub-value"><span id="curr-rain-month">--.-</span> mm</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">Lluvia Anual</p>
+                <p class="sub-value"><span id="curr-rain-year">--.-</span> mm</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">ET Diaria</p>
+                <p class="sub-value"><span id="curr-et-day">--.---</span> mm</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">ET Mensual</p>
+                <p class="sub-value"><span id="curr-et-month">--.---</span> mm</p>
+            </div>
+            <div class="card-sub">
+                <p class="sub-label">ET Anual</p>
+                <p class="sub-value"><span id="curr-et-year">--.---</span> mm</p>
+            </div>
+        </div>
+    </div>
+
+<script>
+        // Endpoint del Proxy configurado para WeatherLink API v2
+        const PROXY_URL = "https://meteotetuan.w5.lt/cullera/cullera_proxy.php";
+
+        // Funciones auxiliares de conversión (Sistema Imperial -> Sistema Métrico)
+        const fToC = (f) => f !== null && f !== undefined ? ((f - 32) * 5 / 9).toFixed(1) : "--.-";
+        const mphToKmh = (mph) => mph !== null && mph !== undefined ? (mph * 1.60934).toFixed(1) : "--.-";
+        const inhgToHpa = (inhg) => inhg !== null && inhg !== undefined ? (inhg * 33.8639).toFixed(1) : "----.-";
+        const inchesToMm = (inches, decimals = 1) => inches !== null && inches !== undefined ? (inches * 25.4).toFixed(decimals) : "--.-";
+
+        // Transforma los grados geográficos del viento en rumbo cardinal
+        function obtenerCardinales(grados) {
+            if (grados === null || grados === undefined) return "--";
+            const direcciones = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"];
+            const indice = Math.round(grados / 22.5) % 16;
+            return direcciones[indice];
+        }
+
+        // Decodifica la tendencia del barómetro Davis Hardware
+        function calcularTendenciaBar(valor) {
+            if (valor > 0) return "▲ Subiendo";
+            if (valor < 0) return "▼ Bajando";
+            return "═ Estable";
+        }
+
+        async function fetchWeatherData() {
+            try {
+                const response = await fetch(PROXY_URL);
+                if (!response.ok) throw new Error("Fallo de comunicación con el proxy");
+                
+                const data = await response.json();
+                
+                // Validación estricta del array de sensores de la API v2
+                if (!data.sensors || data.sensors.length === 0 || !data.sensors[0].data || data.sensors[0].data.length === 0) {
+                    throw new Error("Estructura de datos vacía o incorrecta");
+                }
+                
+                // Acceso al primer bloque del sensor ISS (Integrated Sensor Suite)
+                const weather = data.sensors[0].data[0];
+
+                // --- 1. METADATOS DE LA CABECERA ---
+                document.getElementById('station-id').textContent = 'ID ESTACIÓN: ' + (data.station_id || '--');
+                
+                // Renderizado localizado de la fecha y hora a partir del timestamp (ts) de WeatherLink
+                const fechaActualizacion = new Date(weather.ts * 1000);
+                document.getElementById('last-update').textContent = fechaActualizacion.toLocaleString('es-ES', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+
+                // --- 2. SECCIÓN 1: TARJETAS PRINCIPALES ---
+                document.getElementById('curr-temp').textContent = fToC(weather.temp_out);
+                document.getElementById('curr-wind').textContent = mphToKmh(weather.wind_speed);
+                document.getElementById('curr-wind-dir').textContent = obtenerCardinales(weather.wind_dir);
+                document.getElementById('curr-bar').textContent = inhgToHpa(weather.bar);
+
+                // --- 3. SECCIÓN 2: CONDICIONES EN TIEMPO REAL ---
+                document.getElementById('curr-hum').textContent = weather.hum_out !== null ? weather.hum_out : "--";
+                document.getElementById('curr-sun').textContent = weather.solar_rad !== null ? weather.solar_rad : "--";
+                document.getElementById('curr-uvi').textContent = weather.uv !== null ? weather.uv.toFixed(1) : "--.-";
+                document.getElementById('curr-wind-deg').textContent = weather.wind_dir !== null ? weather.wind_dir : "--";
+                document.getElementById('curr-wind-avg').textContent = mphToKmh(weather.wind_speed_10_min_avg);
+                document.getElementById('curr-wind-gust').textContent = mphToKmh(weather.wind_gust_10_min);
+                document.getElementById('curr-bar-trend').textContent = calcularTendenciaBar(weather.bar_trend);
+                document.getElementById('curr-dew').textContent = fToC(weather.dew_point);
+                document.getElementById('curr-chill').textContent = fToC(weather.wind_chill);
+                document.getElementById('curr-heat').textContent = fToC(weather.heat_index);
+
+                // --- 4. SECCIÓN 3: PLUVIOMETRÍA Y EVAPOTRANSPIRACIÓN ---
+                // Los campos finalizados en _mm ya vienen pre-convertidos nativamente por la API v2
+                document.getElementById('curr-prec').textContent = (weather.rain_day_mm || 0).toFixed(1);
+                document.getElementById('curr-rain-rate').textContent = (weather.rain_rate_mm || 0).toFixed(1);
+                document.getElementById('curr-rain-storm').textContent = (weather.rain_storm_mm || 0).toFixed(1);
+                document.getElementById('curr-rain-month').textContent = (weather.rain_month_mm || 0).toFixed(1);
+                document.getElementById('curr-rain-year').textContent = (weather.rain_year_mm || 0).toFixed(1);
+                
+                // Conversión de alta precisión para la Evapotranspiración (pulgadas a mm)
+                document.getElementById('curr-et-day').textContent = inchesToMm(weather.et_day, 3);
+                document.getElementById('curr-et-month').textContent = inchesToMm(weather.et_month, 3);
+                document.getElementById('curr-et-year').textContent = inchesToMm(weather.et_year, 3);
+
+            } catch (error) {
+                console.error('Error cargando el dashboard con WeatherLink v2:', error);
+                document.getElementById('station-id').innerHTML = `<span style="color:#f87171;">Fallo de sincronización con WeatherLink v2</span>`;
+            }
+        }
+
+        // Ejecución inmediata al cargar la ventana
+        fetchWeatherData();
+        
+        // Intervalo de actualización automatizado fijado a 1 minuto (60000ms)
+        setInterval(fetchWeatherData, 60000);
+    </script>
+
+</body>
+</html>
