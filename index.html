@@ -26,20 +26,17 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:va
     overflow: hidden;
     padding: 0;
 }
+/* Deja la regla del iframe así de simple en tu CSS principal */
 .weatherlink-frame-container iframe {
     width: 100% !important;
     min-width: 100% !important;
-    height: 500px !important; /* Altura fija cómoda para cualquier pantalla */
+    height: 400px; /* Altura inicial temporal hasta que el script tome el control */
     border: none;
     display: block;
-    overflow: auto !important; /* Activa el scroll interno si falta espacio */
+    transition: height 0.2s ease; /* Suaviza el cambio de tamaño */
 }
 
-/* Y añadimos esta regla justo debajo para pantallas grandes (PC) */
-@media(min-width: 768px) {
-    .weatherlink-frame-container iframe {
-        height: 520px; /* En ordenadores los bloques se ponen de lado y ocupan menos altura */
-    }
+
 }    
 
 /* CORRECCIÓN PRINCIPAL: Expansión total adaptativa */
@@ -353,6 +350,18 @@ footer{background:#1f2937;color:#d1d5db;padding:26px 18px;margin-top:40px}
     </div>
 </div>
 </footer>
-
+<script>
+    // SCRIPT PARA LA WEB PRINCIPAL: Escucha la altura y ajusta el iframe
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.dashboardHeight) {
+            const iframe = document.getElementById('iframe-meteo');
+            if (iframe) {
+                // Sumamos 20px extra de margen de seguridad para evitar cualquier micro-scroll
+                iframe.style.height = (event.data.dashboardHeight + 20) + 'px';
+            }
+        }
+    });
+</script>
+    
 </body>
 </html>
