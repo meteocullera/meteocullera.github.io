@@ -4,93 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Meteorológico - Cullera</title>
- <style>
-        /* Estilos base del Dashboard sin dependencias externas */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0f172a;
-            color: #f1f5f9;
-            margin: 0;
-            padding: 16px;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-        }
-        @media (min-width: 768px) { body { padding: 32px; } }
-        
-        .container {
-            width: 100%;
-            max-width: 1024px;
-            background-color: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(12px);
-            border-radius: 16px;
-            border: 1px solid rgba(71, 85, 105, 0.5);
-            padding: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            box-sizing: border-box;
-        }
-        
-        .header {
-            display: flex;
-            flex-direction: column;
-            border-bottom: 1px solid rgba(71, 85, 105, 0.6);
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-            gap: 8px;
-        }
-        @media (min-width: 640px) {
-            .header { flex-direction: row; justify-content: space-between; align-items: center; }
-        }
-        
-        .title { font-size: 24px; font-weight: 700; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px; }
-        .indicator { width: 12px; height: 12px; background-color: #10b981; border-radius: 50%; display: inline-block; }
-        .station { font-family: monospace; font-size: 12px; color: #94a3b8; margin: 4px 0 0 0; text-transform: uppercase; }
-        .update-box { font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
-        .update-time { font-size: 14px; color: #e2e8f0; font-weight: 500; margin: 4px 0 0 0; }
+<script>
+        const PROXY_URL = "https://w5.lt";
 
-        /* Cuadrícula elástica calcada de tu grid-4 original */
-        .grid-4 { display: grid; grid-template-cols: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
-        @media (min-width: 768px) { .grid-4 { grid-template-cols: repeat(4, 1fr); } }
-        
-        /* CORRECCIÓN MECÁNICA: Se elimina min-height y se usa padding como en tus tarjetas sub antiguas */
-        .card-main { 
-            border-radius: 12px; 
-            padding: 20px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; 
-            box-sizing: border-box;
-        }
-        
-        /* Subetiquetas de color por categorías */
-        .card-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .label-temp { color: #fde047; } 
-        .label-hum { color: #f472b6; }
-        .label-wind { color: #93c5fd; } 
-        .label-bar { color: #6ee7b7; }
-        .label-sun { color: #fbbf24; }
-        .label-rain { color: #38bdf8; }
-        .label-et { color: #a78bfa; }
-        
-        /* Fuentes premium gigantes adaptables */
-        .value-large { font-size: 32px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; margin-top: 8px; display: block; }
-        @media (min-width: 768px) { .value-large { font-size: 36px; } }
-        .unit { font-size: 18px; font-weight: 500; }
-        .badge { font-size: 12px; font-weight: 700; background-color: rgba(59,130,246,0.2); color: #93c5fd; border-radius: 4px; font-family: monospace; margin-left: 6px; padding: 2px 6px; vertical-align: middle; }
+        // Funciones auxiliares de conversión (Sistema Imperial -> Sistema Métrico)
+        const fToC = (f) => f !== null && f !== undefined ? ((f - 32) * 5 / 9).toFixed(1) : "--.-";
+        const mphToKmh = (mph) => mph !== null && mph !== undefined ? (mph * 1.60934).toFixed(1) : "--.-";
+        const inhgToHpa = (inhg) => inhg !== null && inhg !== undefined ? (inhg * 33.8639).toFixed(1) : "----.-";
+        const inchesToMm = (inches, decimals = 1) => inches !== null && inches !== undefined ? (inches * 25.4).toFixed(decimals) : "--.-";
 
-        /* Degradados temáticos de fondo */
-        .card-temp, .card-dew, .card-chill, .card-heat { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(234,88,12,0.1)); border-color: rgba(245,158,11,0.2); }
-        .card-hum { background: linear-gradient(135deg, rgba(236,72,153,0.1), rgba(219,39,119,0.1)); border-color: rgba(236,72,153,0.2); }
-        .card-wind, .card-wind-avg { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(79,70,229,0.1)); border-color: rgba(59,130,246,0.2); }
-        .card-bar { background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(13,148,136,0.1)); border-color: rgba(16,185,129,0.2); }
-        .card-sun, .card-uv { background: linear-gradient(135deg, rgba(217,119,6,0.1), rgba(251,191,36,0.1)); border-color: rgba(217,119,6,0.2); }
-        .card-rain, .card-rain-rate, .card-rain-storm, .card-rain-totals { background: linear-gradient(135deg, rgba(14,165,233,0.1), rgba(2,132,199,0.1)); border-color: rgba(14,165,233,0.2); }
-        .card-et, .card-et-totals { background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(109,40,217,0.1)); border-color: rgba(139,92,246,0.2); }
-    </style>
-   
+        // Transforma los grados geográficos del viento en rumbo cardinal
+        function obtenerCardinales(grados) {
+            if (grados === null || grados === undefined) return "--";
+            const direcciones = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"];
+            const indice = Math.round(grados / 22.5) % 16;
+            return direcciones[indice];
+        }
+
+        // Decodifica la tendencia del barómetro Davis Hardware
+        function calcularTendenciaBar(valor) {
+            if (valor > 0) return "▲ Subiendo";
+            if (valor < 0) return "▼ Bajando";
+            return "═ Estable";
+        }
+
+        // FUNCIÓN CLAVE: Envía la altura real del contenido a la web principal (Index)
+        function enviarAlturaAlContenedor() {
+            const alturaTotal = document.documentElement.scrollHeight || document.body.scrollHeight;
+            if (alturaTotal) {
+                // Notifica al script de la web principal para que ajuste el height: auto del iframe
+                window.parent.postMessage({ tipo: "setHeight", height: alturaTotal }, "*");
+                
+                // Adicionalmente, por si la web principal usa el script estándar antiguo de iFrameResizer:
+                if ('parentIFrame' in window) {
+                    window.parentIFrame.size(alturaTotal);
+                }
+            }
+        }
+
+        async function fetchWeatherData() {
+            try {
+                const response = await fetch(PROXY_URL);
+                if (!response.ok) throw new Error("Fallo de comunicación con el proxy");
+                
+                const data = await response.json();
+                
+                if (!data.sensors || data.sensors.length === 0 || !data.sensors.data || data.sensors.data.length === 0) {
+                    throw new Error("Estructura de datos vacía o incorrecta");
+                }
+                
+                const weather = data.sensors.data;
+
+                // --- HORA DE ACTUALIZACIÓN (Horas:Minutos) ---
+                const fechaActualizacion = new Date(weather.ts * 1000);
+                const horas = String(fechaActualizacion.getHours()).padStart(2, '0');
+                const minutes = String(fechaActualizacion.getMinutes()).padStart(2, '0');
+                document.getElementById('last-update').textContent = `${horas}:${minutes}`;
+
+                // --- INYECCIÓN DE VARIABLES EN TARJETAS PREMIUM ---
+                document.getElementById('curr-temp').textContent = fToC(weather.temp_out);
+                document.getElementById('curr-hum').textContent = weather.hum_out !== null ? weather.hum_out : "--";
+                document.getElementById('curr-wind-deg').textContent = weather.wind_dir !== null ? weather.wind_dir : "--";
+                document.getElementById('curr-wind-dir').textContent = obtenerCardinales(weather.wind_dir);
+                document.getElementById('curr-wind-avg').textContent = mphToKmh(weather.wind_speed_10_min_avg);
+                document.getElementById('curr-bar').textContent = inhgToHpa(weather.bar);
+                document.getElementById('curr-dew').textContent = fToC(weather.dew_point);
+                document.getElementById('curr-chill').textContent = fToC(weather.wind_chill);
+                document.getElementById('curr-heat').textContent = fToC(weather.heat_index);
+                document.getElementById('curr-sun').textContent = weather.solar_rad !== null ? weather.solar_rad : "--";
+                document.getElementById('curr-uvi').textContent = weather.uv !== null ? weather.uv.toFixed(1) : "--.-";
+                document.getElementById('curr-bar-trend').textContent = calcularTendenciaBar(weather.bar_trend);
+                
+                // Pluviometría
+                document.getElementById('curr-prec').textContent = (weather.rain_day_mm || 0).toFixed(1);
+                document.getElementById('curr-rain-rate').textContent = (weather.rain_rate_mm || 0).toFixed(1);
+                document.getElementById('curr-rain-storm').textContent = (weather.rain_storm_mm || 0).toFixed(1);
+                document.getElementById('curr-rain-month').textContent = (weather.rain_month_mm || 0).toFixed(1);
+                document.getElementById('curr-rain-year').textContent = (weather.rain_year_mm || 0).toFixed(1);
+                
+                // Evapotranspiración
+                document.getElementById('curr-et-day').textContent = inchesToMm(weather.et_day, 3);
+                document.getElementById('curr-et-month').textContent = inchesToMm(weather.et_month, 3);
+                document.getElementById('curr-et-year').textContent = inchesToMm(weather.et_year, 3);
+
+                // Forzar el recálculo y envío de altura tras pintar los datos
+                setTimeout(enviarAlturaAlContenedor, 200);
+
+            } catch (error) {
+                console.error('Error cargando el dashboard con WeatherLink v2:', error);
+                document.getElementById('last-update').innerHTML = `<span style="color:#f87171; font-size:12px;">ERR</span>`;
+            }
+        }
+
+        // Ejecución inicial inmediata
+        fetchWeatherData();
+        
+        // Intervalo de actualización automatizado fijado a 1 minuto (60000ms)
+        setInterval(fetchWeatherData, 60000);
+
+        // Volver a calcular altura si cambia el tamaño de la pantalla o termina de cargar la estructura
+        window.addEventListener("load", () => setTimeout(enviarAlturaAlContenedor, 300));
+        window.addEventListener("resize", enviarAlturaAlContenedor);
+    </script>   
 </head>
 <body>
 <div class="container">
