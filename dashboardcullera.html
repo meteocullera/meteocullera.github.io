@@ -237,6 +237,23 @@
         // Carga inicial y bucle automático cada 5 minutos
         fetchWeatherData();
         setInterval(fetchWeatherData, 300000);
+
+        // CÓDIGO PARA EL DASHBOARD: Envía la altura real a la web principal
+function sendHeight() {
+    const height = document.body.scrollHeight;
+    window.parent.postMessage({ 'dashboardHeight': height }, '*');
+}
+
+// Ejecutar al cargar los datos y al cambiar el tamaño de la pantalla
+window.addEventListener('load', () => {
+    setTimeout(sendHeight, 300); // Pequeño margen para asegurar que cargue el diseño
+});
+window.addEventListener('resize', sendHeight);
+
+// Modifica tu función fetchWeatherData() para que envíe la altura tras pintar los datos
+// Busca el final de tu 'try {}' dentro de 'fetchWeatherData()' y añade:
+setTimeout(sendHeight, 200);
+        
     </script>
 </body>
 </html>
